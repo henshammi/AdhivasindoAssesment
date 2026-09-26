@@ -2,7 +2,7 @@
 
 ## 🎯 Goal
 
-Membina aplikasi **CRUD Task Management Board (Kanban Board)** menggunakan **Ionic React** dan **LocalStorage** mengikut spesifikasi dokumen ujian PT Adhivasindo.
+Build a **CRUD Task Management Board (Kanban Board)** application using **Ionic React** and **LocalStorage** according to the PT Adhivasindo assessment specifications.
 
 ---
 
@@ -19,50 +19,51 @@ Membina aplikasi **CRUD Task Management Board (Kanban Board)** menggunakan **Ion
 
 ### 1. Board & Column
 
-- Mempunyai 5 kolom utama: **To Do**, **Doing**, **Review**, **Done**, dan **Rework**[cite: 1].
-- Boleh menambah list/kolom baharu (mengikut UI rujukan)[cite: 1].
+- Must have 5 main columns: **To Do**, **Doing**, **Review**, **Done**, and **Rework**.
+- Capable of accommodating multiple task cards in each column.
 
 ### 2. Task Card Attributes
 
-Setiap task wajib mempunyai struktur data berikut[cite: 1]:
+Each task must have the following data structure:
 
 - `id`: string
 - `title`: string
 - `description`: string
 - `columnId`: 'todo' | 'doing' | 'review' | 'done' | 'rework'
-- `label`: 'Feature' | 'Bug' | 'Issue' | 'Undefined'[cite: 1]
-- `priority`: 'Low' | 'Medium' | 'High' (opsional)[cite: 1]
-- `assignees`: Array of `{ id, name, avatar }`[cite: 1]
-- `dueDate`: string[cite: 1]
-- `subtasks`: Array of `{ id, title, completed }`[cite: 1]
-- `attachments`: Array of file names / dummy icons[cite: 1]
-- `coverImage`: string (Poin Bonus)[cite: 1]
+- `label`: 'Feature' | 'Bug' | 'Issue' | 'Undefined'
+- `priority`: 'Low' | 'Medium' | 'High' (optional)
+- `assignees`: Array of `{ id, name, avatar }`
+- `dueDate`: string
+- `subtasks`: Array of `{ id, title, completed }`
+- `attachments`: Array of file names / dummy icons
+- `coverImage`: string (Bonus Point)
 
 ### 3. Core Features to Implement
 
 1. **CRUD Task**:
-   - **Create**: Tambah task baharu ke dalam kolom pilihan[cite: 1].
-   - **Read**: Paparkan task card mengikut susun atur UI mockup[cite: 1].
-   - **Update**: Modal Form / Detail View untuk kemaskini semua maklumat task[cite: 1].
-   - **Delete**: Padam task dari board[cite: 1].
-2. **Drag & Drop**: Boleh pindahkan task card antar-kolom secara interaktif menggunakan `@hello-pangea/dnd`[cite: 1].
-3. **Checklist & Progress**: User boleh tambah subtask, tanda selesai/belum, dan progress bar mengira peratusan secara automatik[cite: 1].
-4. **Filtering & Searching**: Penapis berdasarkan _Assignee_, _Label_, atau _Due Date_, serta input carian tajuk[cite: 1].
-5. **Data Persistence**: Simpan semua perubahan state ke `LocalStorage`[cite: 1].
-6. **Toast Notification**: Tampilkan `IonToast` setiap kali selepas aksi Create, Update, atau Delete (Poin Bonus)[cite: 1].
+   - **Create**: Add a new task to a specific column.
+   - **Read**: Display task cards according to the UI mockup layout.
+   - **Update**: Modal Form / Detail View to update all task information.
+   - **Delete**: Remove a task from the board.
+2. **Drag & Drop**: Move task cards between columns interactively using `@hello-pangea/dnd` (frontend simulation only).
+3. **Checklist & Progress**: Users can add subtasks, check/uncheck them, and the progress bar calculates the percentage automatically.
+4. **Filtering & Searching**: Filter based on _Assignee_, _Label_, or _Due Date_, and a search input for the title.
+5. **Data Persistence**: Save all state changes to `LocalStorage`.
+6. **Toast Notification**: Show an `IonToast` with appropriate colors (success, primary, danger) after Create, Update, or Delete actions.
 
 ---
 
 ## 🎨 UI/UX Guidelines
 
-- Replicate susun atur UI daripada imej rujukan (Kanban board layout + Task detail modal)[cite: 1].
-- Pastikan paparan responsif (selesa di skrin Desktop dan Mobile)[cite: 1].
-- Gunakan komponen Ionic UI asli sebanyak mungkin[cite: 1].
+- Replicate the UI layout from the reference image (Kanban board layout + Task detail modal).
+- Ensure a responsive display (optimized for both Desktop and Mobile screens).
+- Use native Ionic UI components as much as possible.
 
 ---
 
 ## ⛔ Constraints & Strict Rules
 
-- **JANGAN** menggunakan backend API luaran (Gunakan LocalStorage)[cite: 1].
-- **JANGAN** menambah perpustakaan UI lain seperti Tailwind, Bootstrap, atau Material UI kecuali diminta. Utamakan Ionic UI & Ionic CSS utilities[cite: 1].
-- Tulis kod menggunakan **TypeScript** yang kemas dengan pemisahan komponen yang jelas (`components/`, `types/`, `hooks/`, `utils/`).
+- **LANGUAGE REQUIREMENT**: ALL code, variables, functions, components, UI text, and comments MUST be written in **English**. Do not use Indonesian or Malay words in the codebase.
+- **NO BACKEND**: Do not use any external backend API. Rely strictly on LocalStorage.
+- **NO EXTRA UI LIBRARIES**: Do not add other UI libraries like Tailwind, Bootstrap, or Material UI unless absolutely necessary. Prioritize Ionic UI & Ionic CSS utilities.
+- Write clean **TypeScript** code with clear component separation (`components/`, `types/`, `hooks/`, `utils/`).

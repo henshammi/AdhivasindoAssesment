@@ -1,8 +1,8 @@
 /* ============================================================
-   TaskModal — borang detail task (Create / Edit / Delete)
+   TaskModal — task detail form (Create / Edit / Delete)
    ============================================================ */
 
-/* Saiz modal — kad terpusat, lebih kecil daripada skrin penuh */
+/* Modal size — centered card, smaller than the full screen */
 .task-modal {
   --width: min(560px, 94vw);
   --height: auto;
@@ -18,7 +18,7 @@
   --padding-top: 8px;
 }
 
-/* ----- Bahagian Checklist / Subtasks ----- */
+/* ----- Checklist / Subtasks section ----- */
 
 .task-modal__checklist {
   padding: 0 16px 24px;
@@ -57,7 +57,7 @@
   --padding-end: 10px;
 }
 
-/* ----- Bahagian Lampiran (dummy) ----- */
+/* ----- Attachments section (dummy) ----- */
 
 .task-modal__attachments {
   padding: 0 16px 24px;
@@ -76,7 +76,7 @@
   font-weight: 700;
 }
 
-/* Area dummy drag & drop — border putus-putus seperti imej referensi */
+/* Dummy drag & drop area — dashed border like the reference image */
 .task-modal__dropzone {
   display: flex;
   flex-direction: column;
@@ -108,7 +108,7 @@
   font-size: 0.85rem;
 }
 
-/* Nama fail lampiran — elips apabila nama terlalu panjang */
+/* Attachment file name — ellipsis when the name is too long */
 .task-modal__attachment-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -116,7 +116,7 @@
   font-size: 0.9rem;
 }
 
-/* ----- Footer: Padam / Batal / Simpan ----- */
+/* ----- Footer: Delete / Cancel / Save ----- */
 
 .task-modal__footer ion-toolbar {
   --border-color: var(--ion-color-light-shade);

@@ -1,5 +1,5 @@
 /* ============================================================
-   Board — layout kanban 5 kolom dengan scroll mendatar
+   Board — 5-column kanban layout with horizontal scroll
    ============================================================ */
 
 .board {
@@ -13,7 +13,7 @@
 }
 
 /* ------------------------------------------------------------
-   Kolom
+   Column
    ---------------------------------------------------------- */
 
 .board__column {
@@ -45,7 +45,7 @@
   color: var(--ion-text-color);
 }
 
-/* Bilangan task dalam kolom */
+/* Number of tasks in the column */
 .board__column-count {
   display: inline-flex;
   align-items: center;
@@ -60,7 +60,7 @@
   color: var(--ion-color-medium-contrast);
 }
 
-/* Tombol "+" placeholder untuk tambah task nanti */
+/* "+" placeholder button for adding a task later */
 .board__add-button {
   --margin-start: 0;
   --margin-end: 0;
@@ -68,7 +68,7 @@
   --padding-end: 4px;
 }
 
-/* Badan kolom — senarai card (juga droppable bagi @hello-pangea/dnd) */
+/* Column body — card list (also the droppable for @hello-pangea/dnd) */
 .board__column-body {
   display: flex;
   flex-direction: column;
@@ -77,14 +77,14 @@
   min-height: 56px;
 }
 
-/* Serlah apabila card ditarik ke atas kolom (drag over) */
+/* Highlight when a card is dragged over the column (drag over) */
 .board__column-body--drag-over {
   background: rgba(var(--ion-color-primary-rgb), 0.08);
   border-radius: 8px;
 }
 
-/* Pembungkus card — elemen draggable itu sendiri.
-   dnd mengawal kedudukan melalui inline style. */
+/* Card wrapper — the draggable element itself.
+   dnd controls the position through inline styles. */
 .board__task-wrapper {
   cursor: grab;
 }
@@ -93,7 +93,7 @@
   cursor: grabbing;
 }
 
-/* Keadaan kosong apabila tiada task dalam kolom */
+/* Empty state when the column has no tasks */
 .board__empty {
   margin: 0;
   padding: 18px 8px;
@@ -106,8 +106,8 @@
 }
 
 /* ------------------------------------------------------------
-   Responsif — pada skrin kecil, lebar kolom mengikut sebahagian
-   daripada lebar skrin supaya scroll mendatar lebih selesa.
+   Responsive — on small screens the column width follows a portion
+   of the screen width so horizontal scrolling feels more comfortable.
    ---------------------------------------------------------- */
 @media (max-width: 576px) {
   .board {

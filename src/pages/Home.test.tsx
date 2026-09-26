@@ -3,21 +3,21 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import Home from './Home';
 
 /**
- * Ujian integrasi bar carian pada Home (Tahap 6).
- * IonSearchbar (element tersuai) menerima props melalui host element —
- * carian dijana dengan memancarkan acara `ionInput` terus pada host,
- * meniru corak yang sama seperti ujian TaskModal.
+ * Integration tests for the Home search bar (Stage 6).
+ * IonSearchbar (custom element) receives props through the host element —
+ * the search is triggered by dispatching the `ionInput` event directly
+ * on the host, mimicking the same pattern used in the TaskModal tests.
  */
-describe('Home — carian & penapis (Tahap 6)', () => {
+describe('Home — search & filters (Stage 6)', () => {
   beforeEach(() => {
-    // Kosongkan LocalStorage supaya seed dummyData dipakai setiap kali.
+    // Clear LocalStorage so the dummyData seed is used every time.
     window.localStorage.clear();
   });
 
-  test('IonSearchbar menyaring kad task mengikut judul secara langsung', async () => {
+  test('IonSearchbar filters task cards by title in real time', async () => {
     render(<Home />);
 
-    // Semua task seed dipaparkan pada board sebelum ditapis.
+    // All seed tasks are displayed on the board before filtering.
     expect(
       screen.getByText('Implement dark mode toggle on the settings page')
     ).toBeTruthy();
@@ -25,7 +25,7 @@ describe('Home — carian & penapis (Tahap 6)', () => {
       screen.getByText('Fix crash when uploading files larger than 10 MB')
     ).toBeTruthy();
 
-    // "Taip" carian pada ion-searchbar.
+    // "Type" a search into the ion-searchbar.
     const searchbar = document.querySelector('ion-searchbar');
     expect(searchbar).not.toBeNull();
     await act(async () => {
@@ -34,7 +34,7 @@ describe('Home — carian & penapis (Tahap 6)', () => {
       );
     });
 
-    // Hanya task dengan judul sepadan kekal dipapar.
+    // Only tasks with a matching title remain visible.
     expect(
       screen.getByText('Implement dark mode toggle on the settings page')
     ).toBeTruthy();
@@ -43,7 +43,7 @@ describe('Home — carian & penapis (Tahap 6)', () => {
     ).toBeNull();
   });
 
-  test('butang Semula memulihkan semua task selepas carian aktif', async () => {
+  test('reset button restores all tasks after an active search', async () => {
     render(<Home />);
 
     const searchbar = document.querySelector('ion-searchbar');
@@ -56,7 +56,7 @@ describe('Home — carian & penapis (Tahap 6)', () => {
       screen.queryByText('Fix crash when uploading files larger than 10 MB')
     ).toBeNull();
 
-    // Set semula penapis — seluruh board dipapar semula.
+    // Reset the filters — the whole board is displayed again.
     fireEvent.click(screen.getByText('Reset'));
 
     expect(

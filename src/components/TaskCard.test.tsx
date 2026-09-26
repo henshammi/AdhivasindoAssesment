@@ -4,12 +4,12 @@ import TaskCard from './TaskCard';
 import type { Task } from '../types';
 
 /**
- * Ujian paparan imej muka depan (poin bonus) pada TaskCard.
+ * Tests for the cover image display (bonus point) on TaskCard.
  */
 
-/** Task fixture asas — nilai lalai boleh ditindih per ujian. */
+/** Base task fixture — defaults can be overridden per test. */
 const makeTask = (overrides: Partial<Task> & { id: string }): Task => ({
-  title: 'Task ujian',
+  title: 'Test task',
   description: '',
   columnId: 'todo',
   label: 'Feature',
@@ -20,13 +20,13 @@ const makeTask = (overrides: Partial<Task> & { id: string }): Task => ({
   ...overrides,
 });
 
-describe('TaskCard — imej muka depan (poin bonus)', () => {
-  test('memaparkan imej cover di bahagian atas card apabila coverImage diisi', () => {
+describe('TaskCard — cover image (bonus point)', () => {
+  test('renders the cover image at the top of the card when coverImage is set', () => {
     const { container } = render(
       <TaskCard
         task={makeTask({
           id: 'a',
-          coverImage: 'https://contoh.com/imej.jpg',
+          coverImage: 'https://example.com/image.jpg',
         })}
       />
     );
@@ -35,18 +35,18 @@ describe('TaskCard — imej muka depan (poin bonus)', () => {
       '.task-card__cover'
     );
     expect(cover).not.toBeNull();
-    expect(cover?.getAttribute('src')).toBe('https://contoh.com/imej.jpg');
-    expect(cover?.getAttribute('alt')).toBe('Cover: Task ujian');
+    expect(cover?.getAttribute('src')).toBe('https://example.com/image.jpg');
+    expect(cover?.getAttribute('alt')).toBe('Cover: Test task');
   });
 
-  test('tiada elemen imej cover apabila coverImage tidak diisi', () => {
+  test('no cover image element when coverImage is not set', () => {
     const { container } = render(<TaskCard task={makeTask({ id: 'b' })} />);
     expect(container.querySelector('.task-card__cover')).toBeNull();
   });
 });
 
-describe('TaskCard — penunjuk lampiran (attachments)', () => {
-  test('memaparkan ikon & jumlah fail apabila attachments tidak kosong', () => {
+describe('TaskCard — attachment indicator', () => {
+  test('renders the icon & file count when attachments is not empty', () => {
     const { container } = render(
       <TaskCard
         task={makeTask({
@@ -61,7 +61,7 @@ describe('TaskCard — penunjuk lampiran (attachments)', () => {
     expect(indicator?.textContent).toBe('2');
   });
 
-  test('tiada penunjuk lampiran apabila attachments kosong', () => {
+  test('no attachment indicator when attachments is empty', () => {
     const { container } = render(<TaskCard task={makeTask({ id: 'd' })} />);
     expect(container.querySelector('.task-card__attachments')).toBeNull();
   });

@@ -5,7 +5,7 @@ import App from './App';
 test('renders without crashing', async () => {
   const { baseElement } = render(<App />);
 
-  // Basuh kemas kini async @hello-pangea/dnd (StackManager) — elak amaran act(...)
+  // Flush async @hello-pangea/dnd updates (StackManager) — avoids act(...) warnings
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
   });

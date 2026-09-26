@@ -5,10 +5,10 @@ import { initialTasks } from '../utils/dummyData';
 import type { ColumnId, Task } from '../types';
 
 /**
- * IonModal (@ionic/react — createInlineOverlayComponent) memaparkan
- * kandungan melalui portal ke document.body dan hanya mount children
- * selepas acara ionMount/willPresent dipancarkan oleh Stencil.
- * Flush ini memberi masa kepada present() + React mount children.
+ * IonModal (@ionic/react — createInlineOverlayComponent) renders
+ * its content through a portal into document.body and only mounts
+ * children after the ionMount/willPresent event is emitted by Stencil.
+ * This flush gives present() + React time to mount the children.
  */
 const flushModalUpdates = async () => {
   await act(async () => {
@@ -17,9 +17,9 @@ const flushModalUpdates = async () => {
 };
 
 /**
- * Render modal dahulu dalam keadaan tertutup, kemudian buka semula —
- * meniru aliran sebenar (modal dibuka selepas mount) supaya present()
- * berjalan pada elemen yang sudah bersambung dengan document.body.
+ * Render the modal closed first, then open it — mimicking the
+ * real flow (the modal opens after mount) so that present()
+ * runs on an element already connected to document.body.
  */
 const renderOpenModal = async (
   task: Task | null,
@@ -38,7 +38,7 @@ const renderOpenModal = async (
 };
 
 describe('TaskModal', () => {
-  test('mod Create: butang Simpan menghantar task baharu (id kosong) dengan kolom lalai', async () => {
+  test('Create mode: Save button submits a new task (empty id) with the default column', async () => {
     const onSave = vi.fn();
     await renderOpenModal(null, 'doing', {
       onClose: vi.fn(),
@@ -46,28 +46,28 @@ describe('TaskModal', () => {
       onDelete: vi.fn(),
     });
 
-    // Kandungan modal berada dalam portal document.body.
+    // The modal content lives in the document.body portal.
     const titleInput = document.querySelector('ion-input');
     expect(titleInput).not.toBeNull();
     await fireEvent(
       titleInput as Element,
-      new CustomEvent('ionInput', { detail: { value: 'Task ujian baharu' } })
+      new CustomEvent('ionInput', { detail: { value: 'New test task' } })
     );
 
     fireEvent.click(screen.getByText('Save'));
 
     expect(onSave).toHaveBeenCalledTimes(1);
     const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
-    expect(savedTask.title).toBe('Task ujian baharu');
-    // id kosong → Home akan menjana ID baharu (mod Create)
+    expect(savedTask.title).toBe('New test task');
+    // Empty id → Home will generate a new id (Create mode)
     expect(savedTask.id).toBe('');
-    // Kolom lalai diwarisi daripada prop defaultColumn
+    // The default column is inherited from the defaultColumn prop
     expect(savedTask.columnId).toBe('doing');
-    // Mod Create tanpa URL imej muka → coverImage kekal undefined
+    // Create mode without a cover URL → coverImage stays undefined
     expect(savedTask.coverImage).toBeUndefined();
   });
 
-  test('mod Edit: papar data task sedia ada; butang Padam memanggil onDelete', async () => {
+  test('Edit mode: shows existing task data; Delete button calls onDelete', async () => {
     const onDelete = vi.fn();
     const task = initialTasks[0];
     await renderOpenModal(task, 'todo', {
@@ -76,17 +76,17 @@ describe('TaskModal', () => {
       onDelete,
     });
 
-    // Judul task sedia ada dipaparkan pada input pertama.
+    // The existing task title is shown in the first input.
     const titleInput =
       document.querySelector('ion-input') as HTMLIonInputElement;
     expect(titleInput.value).toBe(task.title);
 
-    // Butang Padam hanya wujud dalam mod Edit.
+    // The Delete button only exists in Edit mode.
     fireEvent.click(screen.getByText('Delete'));
     expect(onDelete).toHaveBeenCalledWith(task.id);
   });
 
-  test('checklist: subtask baharu ditambah melalui input + butang Tambah', async () => {
+  test('checklist: a new subtask is added via the input + Add button', async () => {
     const onSave = vi.fn();
     await renderOpenModal(null, 'todo', {
       onClose: vi.fn(),
@@ -94,33 +94,33 @@ describe('TaskModal', () => {
       onDelete: vi.fn(),
     });
 
-    // Isi input subtask dalam bahagian checklist, kemudian tekan Tambah.
+    // Fill the subtask input in the checklist section, then press Add.
     const subtaskInput = document.querySelector(
       '.task-modal__add-subtask ion-input'
     );
     await fireEvent(
       subtaskInput as Element,
-      new CustomEvent('ionInput', { detail: { value: 'Subtask ujian' } })
+      new CustomEvent('ionInput', { detail: { value: 'Test subtask' } })
     );
     fireEvent.click(screen.getByText('Add'));
 
-    // Isi judul supaya butang Simpan aktif, kemudian simpan.
+    // Fill the title so the Save button is enabled, then save.
     const titleInput = document.querySelector('ion-input');
     await fireEvent(
       titleInput as Element,
       new CustomEvent('ionInput', {
-        detail: { value: 'Task dengan checklist' },
+        detail: { value: 'Task with checklist' },
       })
     );
     fireEvent.click(screen.getByText('Save'));
 
     const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
     expect(savedTask.subtasks).toHaveLength(1);
-    expect(savedTask.subtasks[0]?.title).toBe('Subtask ujian');
+    expect(savedTask.subtasks[0]?.title).toBe('Test subtask');
     expect(savedTask.subtasks[0]?.completed).toBe(false);
   });
 
-  test('poin bonus: URL imej muka diisi & dihantar bersama task semasa Simpan', async () => {
+  test('bonus point: cover image URL is filled in & submitted with the task on Save', async () => {
     const onSave = vi.fn();
     await renderOpenModal(null, 'todo', {
       onClose: vi.fn(),
@@ -128,14 +128,14 @@ describe('TaskModal', () => {
       onDelete: vi.fn(),
     });
 
-    // Isi judul supaya butang Simpan aktif.
+    // Fill the title so the Save button is enabled.
     const titleInput = document.querySelector('ion-input');
     await fireEvent(
       titleInput as Element,
-      new CustomEvent('ionInput', { detail: { value: 'Task dengan imej' } })
+      new CustomEvent('ionInput', { detail: { value: 'Task with image' } })
     );
 
-    // Isi URL imej muka depan pada input khas (nilai ditrim semasa simpan).
+    // Fill the cover image URL in the dedicated input (the value is trimmed on save).
     const coverInput = document.querySelector(
       'ion-input.task-modal__cover-input'
     );
@@ -143,18 +143,18 @@ describe('TaskModal', () => {
     await fireEvent(
       coverInput as Element,
       new CustomEvent('ionInput', {
-        detail: { value: '  https://contoh.com/imej.jpg  ' },
+        detail: { value: '  https://example.com/image.jpg  ' },
       })
     );
 
     fireEvent.click(screen.getByText('Save'));
 
     const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
-    expect(savedTask.title).toBe('Task dengan imej');
-    expect(savedTask.coverImage).toBe('https://contoh.com/imej.jpg');
+    expect(savedTask.title).toBe('Task with image');
+    expect(savedTask.coverImage).toBe('https://example.com/image.jpg');
   });
 
-  test('lampiran dummy: butang Add Dummy File menambah nama fail & disimpan bersama task', async () => {
+  test('dummy attachments: Add Dummy File button adds file names & saves them with the task', async () => {
     const onSave = vi.fn();
     await renderOpenModal(null, 'todo', {
       onClose: vi.fn(),
@@ -162,21 +162,21 @@ describe('TaskModal', () => {
       onDelete: vi.fn(),
     });
 
-    // Area dummy dropzone dipaparkan (UI sahaja).
+    // The dummy dropzone area is rendered (UI only).
     expect(
       screen.getByText('Drag & Drop files here or browse from device')
     ).toBeTruthy();
 
-    // Tambah dua fail dummy melalui butang Add Dummy File.
+    // Add two dummy files via the Add Dummy File button.
     fireEvent.click(screen.getByText('Add Dummy File'));
     fireEvent.click(screen.getByText('Add Dummy File'));
 
-    // Isi judul supaya butang Save aktif, kemudian simpan.
+    // Fill the title so the Save button is enabled, then save.
     const titleInput = document.querySelector('ion-input');
     await fireEvent(
       titleInput as Element,
       new CustomEvent('ionInput', {
-        detail: { value: 'Task dengan lampiran' },
+        detail: { value: 'Task with attachments' },
       })
     );
     fireEvent.click(screen.getByText('Save'));

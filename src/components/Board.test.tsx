@@ -4,9 +4,9 @@ import Board from './Board';
 import { initialTasks } from '../utils/dummyData';
 
 /**
- * Basuh kemas kini async @hello-pangea/dnd semasa mount — dnd mengukur
- * dimensi melalui requestAnimationFrame dan mengemas kini state dalaman
- * (StackManager) selepas render. Flush ini mengelak amaran act(...).
+ * Flush async @hello-pangea/dnd updates on mount — dnd measures
+ * dimensions via requestAnimationFrame and updates its internal
+ * state (StackManager) after render. This flush avoids act(...) warnings.
  */
 const flushDndUpdates = async () => {
   await act(async () => {
@@ -14,7 +14,7 @@ const flushDndUpdates = async () => {
   });
 };
 
-/** Render Board dengan props terkawal seperti penggunaannya di Home. */
+/** Render Board with controlled props as used in Home. */
 const renderBoard = () =>
   render(
     <Board
@@ -26,7 +26,7 @@ const renderBoard = () =>
   );
 
 describe('Board', () => {
-  test('memaparkan kelima-lima kolom utama board', async () => {
+  test('renders all five main board columns', async () => {
     renderBoard();
     await flushDndUpdates();
 
@@ -37,14 +37,14 @@ describe('Board', () => {
     expect(screen.getByText('Rework')).toBeDefined();
   });
 
-  test('memaparkan 7 task dummy merentasi kolom masing-masing', async () => {
+  test('renders the 7 dummy tasks across their respective columns', async () => {
     const { container } = renderBoard();
     await flushDndUpdates();
 
-    // 7 card TaskCard daripada initialTasks
+    // 7 TaskCard cards from initialTasks
     expect(container.querySelectorAll('.task-card')).toHaveLength(7);
 
-    // Setiap kolom memaparkan task dummy yang betul
+    // Each column displays the correct dummy tasks
     expect(
       screen.getByText('Implement dark mode toggle on the settings page')
     ).toBeDefined();

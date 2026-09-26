@@ -4,14 +4,14 @@ import type { Task } from '../types';
 
 /**
  * ============================================================
- *  Ujian fungsi tulen filterTasks — carian judul, penapis label,
- *  assignee dan tarikh akhir, serta gabungan kriteria (AND).
+ *  Pure function tests for filterTasks — title search, label,
+ *  assignee and due date filters, plus combined criteria (AND).
  * ============================================================
  */
 
-/** Bina task fixture ringkas dengan nilai lalai yang boleh ditindih. */
+/** Build a simple task fixture with overridable defaults. */
 const makeTask = (overrides: Partial<Task> & { id: string }): Task => ({
-  title: 'Task contoh',
+  title: 'Example task',
   description: '',
   columnId: 'todo',
   label: 'Feature',
@@ -22,7 +22,7 @@ const makeTask = (overrides: Partial<Task> & { id: string }): Task => ({
   ...overrides,
 });
 
-/** Tarikh ISO tempatan (YYYY-MM-DD) bagi hari ini dengan ofsset hari. */
+/** Local ISO date (YYYY-MM-DD) for today with a day offset. */
 const dateFromToday = (offsetDays: number): string => {
   const date = new Date();
   date.setDate(date.getDate() + offsetDays);
@@ -30,7 +30,7 @@ const dateFromToday = (offsetDays: number): string => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 
-/** Kriteria lalai — tiada penapis aktif. */
+/** Default criteria — no active filters. */
 const noFilter = {
   query: '',
   label: null,
@@ -39,7 +39,7 @@ const noFilter = {
 };
 
 describe('filterTasks', () => {
-  test('tiada kriteria aktif → semua task dikembalikan', () => {
+  test('no active criteria → all tasks are returned', () => {
     const tasks = [
       makeTask({ id: 'a' }),
       makeTask({ id: 'b', label: 'Bug' }),
@@ -48,28 +48,28 @@ describe('filterTasks', () => {
     expect(filterTasks(tasks, noFilter)).toHaveLength(3);
   });
 
-  test('carian judul: sepadan sebahagian, tidak peka huruf & ditrim', () => {
+  test('title search: partial match, case-insensitive & trimmed', () => {
     const tasks = [
       makeTask({ id: 'a', title: 'Implement Dark Mode Toggle' }),
       makeTask({ id: 'b', title: 'Fix crash on upload' }),
     ];
-    const hasil = filterTasks(tasks, { ...noFilter, query: '  dark mode ' });
-    expect(hasil).toHaveLength(1);
-    expect(hasil[0]?.id).toBe('a');
+    const result = filterTasks(tasks, { ...noFilter, query: '  dark mode ' });
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('a');
   });
 
-  test('penapis label mengembalikan hanya task dengan label sepadan', () => {
+  test('label filter returns only tasks with the matching label', () => {
     const tasks = [
       makeTask({ id: 'a', label: 'Feature' }),
       makeTask({ id: 'b', label: 'Bug' }),
       makeTask({ id: 'c', label: 'Undefined' }),
     ];
-    const hasil = filterTasks(tasks, { ...noFilter, label: 'Bug' });
-    expect(hasil).toHaveLength(1);
-    expect(hasil[0]?.id).toBe('b');
+    const result = filterTasks(tasks, { ...noFilter, label: 'Bug' });
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('b');
   });
 
-  test('penapis assignee memadankan mana-mana assignee pada task', () => {
+  test('assignee filter matches any assignee on a task', () => {
     const tasks = [
       makeTask({
         id: 'a',
@@ -87,55 +87,55 @@ describe('filterTasks', () => {
         ],
       }),
     ];
-    const hasil = filterTasks(tasks, { ...noFilter, assigneeId: 'usr-1' });
-    expect(hasil).toHaveLength(2);
-    expect(hasil.map((task) => task.id)).toEqual(['a', 'c']);
+    const result = filterTasks(tasks, { ...noFilter, assigneeId: 'usr-1' });
+    expect(result).toHaveLength(2);
+    expect(result.map((task) => task.id)).toEqual(['a', 'c']);
   });
 
-  test('penapis Tertunggak: tarikh lewat & bukan kolom Done sahaja', () => {
+  test('overdue filter: only past-due tasks outside the Done column', () => {
     const tasks = [
-      // Sudah lewat tarikh, belum selesai → tertunggak.
+      // Past due date, not completed → overdue.
       makeTask({ id: 'a', dueDate: dateFromToday(-1) }),
-      // Sudah lewat tarikh tetapi dalam kolom Done → tidak dikira.
+      // Past due date but in the Done column → not counted.
       makeTask({ id: 'b', dueDate: dateFromToday(-2), columnId: 'done' }),
-      // Tarikh hari ini → belum tertunggak.
+      // Today's date → not yet overdue.
       makeTask({ id: 'c', dueDate: dateFromToday(0) }),
-      // Tiada tarikh akhir → diketepikan.
+      // No due date → skipped.
       makeTask({ id: 'd', dueDate: '' }),
     ];
-    const hasil = filterTasks(tasks, { ...noFilter, due: 'overdue' });
-    expect(hasil).toHaveLength(1);
-    expect(hasil[0]?.id).toBe('a');
+    const result = filterTasks(tasks, { ...noFilter, due: 'overdue' });
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('a');
   });
 
-  test('penapis Hari Ini memadankan hanya tarikh akhir hari ini', () => {
+  test('today filter matches only due dates of today', () => {
     const tasks = [
       makeTask({ id: 'a', dueDate: dateFromToday(0) }),
       makeTask({ id: 'b', dueDate: dateFromToday(1) }),
       makeTask({ id: 'c', dueDate: dateFromToday(-1) }),
     ];
-    const hasil = filterTasks(tasks, { ...noFilter, due: 'today' });
-    expect(hasil).toHaveLength(1);
-    expect(hasil[0]?.id).toBe('a');
+    const result = filterTasks(tasks, { ...noFilter, due: 'today' });
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('a');
   });
 
-  test('penapis 7 Hari memadankan tarikh akhir dalam tempoh seminggu', () => {
+  test('7-day filter matches due dates within one week', () => {
     const tasks = [
-      // Hari ini ✓
+      // Today ✓
       makeTask({ id: 'a', dueDate: dateFromToday(0) }),
-      // Sempadan tepat 7 hari ✓
+      // Exact 7-day boundary ✓
       makeTask({ id: 'b', dueDate: dateFromToday(7) }),
-      // Luar tempoh 7 hari.
+      // Outside the 7-day window.
       makeTask({ id: 'c', dueDate: dateFromToday(10) }),
-      // Sudah lewat — bukan "7 hari akan datang".
+      // Already past — not "next 7 days".
       makeTask({ id: 'd', dueDate: dateFromToday(-1) }),
     ];
-    const hasil = filterTasks(tasks, { ...noFilter, due: 'week' });
-    expect(hasil).toHaveLength(2);
-    expect(hasil.map((task) => task.id)).toEqual(['a', 'b']);
+    const result = filterTasks(tasks, { ...noFilter, due: 'week' });
+    expect(result).toHaveLength(2);
+    expect(result.map((task) => task.id)).toEqual(['a', 'b']);
   });
 
-  test('gabungan kriteria (AND): carian + label + assignee serentak', () => {
+  test('combined criteria (AND): search + label + assignee at once', () => {
     const tasks = [
       makeTask({
         id: 'a',
@@ -156,13 +156,13 @@ describe('filterTasks', () => {
         assignees: [{ id: 'usr-2', name: 'Dewi', avatar: '' }],
       }),
     ];
-    const hasil = filterTasks(tasks, {
+    const result = filterTasks(tasks, {
       query: 'dark mode',
       label: 'Bug',
       assigneeId: 'usr-1',
       due: 'all',
     });
-    expect(hasil).toHaveLength(1);
-    expect(hasil[0]?.id).toBe('a');
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('a');
   });
 });

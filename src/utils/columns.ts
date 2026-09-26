@@ -1,15 +1,15 @@
 /**
  * ============================================================
- *  Konfigurasi Kolom Board — Task Management Board
+ *  Board Column Configuration — Task Management Board
  * ------------------------------------------------------------
- *  Sumber tunggal (single source of truth) bagi susunan dan
- *  nama paparan kolom, dikongsi oleh Board & TaskModal.
+ *  Single source of truth for the ordering and
+ *  display names of the columns, shared by Board & TaskModal.
  * ============================================================
  */
 
 import type { ColumnId } from '../types';
 
-/** Susunan ID kolom utama board (kiri → kanan). */
+/** Order of the board's main column IDs (left → right). */
 export const COLUMN_IDS: ColumnId[] = [
   'todo',
   'doing',
@@ -18,7 +18,7 @@ export const COLUMN_IDS: ColumnId[] = [
   'rework',
 ];
 
-/** Nama paparan bagi setiap kolom. */
+/** Display name for each column. */
 export const COLUMN_TITLES: Record<ColumnId, string> = {
   todo: 'To do',
   doing: 'Doing',

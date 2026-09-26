@@ -1,64 +1,64 @@
 /**
  * ============================================================
- *  Task Management Board — Definisi Jenis Data (Types)
+ *  Task Management Board — Type Definitions
  * ------------------------------------------------------------
- *  Struktur data asas untuk Kanban Board Adhivasindo.
- *  Semua modul lain (hooks, utils, components) akan mengimport
- *  jenis-jenis data dari fail ini sahaja.
+ *  Base data structures for the Adhivasindo Kanban Board.
+ *  All other modules (hooks, utils, components) will import
+ *  their data types from this file only.
  * ============================================================
  */
 
-/** ID kolom utama pada board Kanban. */
+/** Primary column ID on the Kanban board. */
 export type ColumnId = 'todo' | 'doing' | 'review' | 'done' | 'rework';
 
-/** Label kategori bagi sesebuah task. */
+/** Category label for a task. */
 export type LabelType = 'Feature' | 'Bug' | 'Issue' | 'Undefined';
 
-/** Tahap keutamaan task (opsional). */
+/** Task priority level (optional). */
 export type PriorityType = 'Low' | 'Medium' | 'High';
 
-/** Ahli pasukan yang ditugaskan kepada sesebuah task. */
+/** Team member assigned to a task. */
 export interface Assignee {
-  /** ID unik assignee, cth: "usr-1" */
+  /** Unique assignee ID, e.g. "usr-1" */
   id: string;
-  /** Nama penuh assignee */
+  /** Assignee full name */
   name: string;
-  /** URL / path gambar profil (avatar) */
+  /** Profile picture URL / path (avatar) */
   avatar: string;
 }
 
-/** Item checklist (subtask) di dalam sesebuah task. */
+/** Checklist item (subtask) inside a task. */
 export interface Subtask {
-  /** ID unik subtask, cth: "sub-1" */
+  /** Unique subtask ID, e.g. "sub-1" */
   id: string;
-  /** Tajuk / keterangan ringkas subtask */
+  /** Subtask title / short description */
   title: string;
-  /** Status subtask (true = selesai) */
+  /** Subtask status (true = completed) */
   completed: boolean;
 }
 
-/** Struktur utama data Task pada board. */
+/** Main Task data structure on the board. */
 export interface Task {
-  /** ID unik task, cth: "task-1" */
+  /** Unique task ID, e.g. "task-1" */
   id: string;
-  /** Tajuk task */
+  /** Task title */
   title: string;
-  /** Keterangan lanjut task */
+  /** Detailed task description */
   description: string;
-  /** Kolom tempat task ini berada */
+  /** Column where this task currently sits */
   columnId: ColumnId;
-  /** Label kategori task */
+  /** Task category label */
   label: LabelType;
-  /** Keutamaan task — opsional */
+  /** Task priority — optional */
   priority?: PriorityType;
-  /** Senarai ahli yang ditugaskan pada task ini */
+  /** List of members assigned to this task */
   assignees: Assignee[];
-  /** Tarikh akhir dalam format ISO, cth: "2026-09-30" */
+  /** Due date in ISO format, e.g. "2026-09-30" */
   dueDate: string;
-  /** Senarai subtask / checklist untuk progress bar */
+  /** List of subtasks / checklist items for the progress bar */
   subtasks: Subtask[];
-  /** Senarai nama fail attachment / dummy icon */
+  /** List of attachment file names / dummy icons */
   attachments: string[];
-  /** URL / base64 gambar muka depan card — Poin Bonus */
+  /** Card cover image URL / base64 — Bonus Point */
   coverImage?: string;
 }

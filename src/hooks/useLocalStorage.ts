@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
-/** Fungsi setter yang dikembalikan oleh `useLocalStorage`. */
+/** Setter function returned by `useLocalStorage`. */
 export type SetLocalStorageValue<T> = Dispatch<SetStateAction<T>>;
 
 /**
  * ============================================================
- *  useLocalStorage — Custom Hook Generik
+ *  useLocalStorage — Generic Custom Hook
  * ------------------------------------------------------------
- *  Menyegerakkan sebahagian state React dengan `window.localStorage`.
+ *  Keeps a piece of React state in sync with `window.localStorage`.
  *
- *  Ciri-ciri:
- *  - Generik `<T>` — boleh digunakan untuk sebarang bentuk data.
- *  - Nilai awal dibaca secara "lazy" (satu kali sahaja semasa render pertama).
- *  - Ralat `JSON.parse` / `setItem` ditangkap dengan selamat — data rosak
- *    akan memulangkan semula `initialValue`, aplikasi tidak akan crash.
- *  - Sebarang perubahan state akan ditulis semula ke localStorage
- *    secara automatik melalui `useEffect`.
+ *  Features:
+ *  - Generic `<T>` — works with any data shape.
+ *  - The initial value is read "lazily" (only once during the first render).
+ *  - `JSON.parse` / `setItem` errors are caught safely — corrupted
+ *    data falls back to `initialValue`, so the app never crashes.
+ *  - Every state change is written back to localStorage
+ *    automatically through `useEffect`.
  *
- *  Contoh penggunaan:
+ *  Usage example:
  *  ```ts
  *  const [tasks, setTasks] = useLocalStorage<Task[]>('tasks', []);
  *  setTasks((prev) => [...prev, newTask]);
@@ -30,9 +30,9 @@ export function useLocalStorage<T>(
   initialValue: T
 ): [T, SetLocalStorageValue<T>] {
   /**
-   * Baca nilai awal secara "lazy" — hanya dilaksanakan sekali.
-   * Jika data di localStorage rosak (invalid JSON), amaran diberikan
-   * dan `initialValue` digunakan sebagai gantinya.
+   * Read the initial value "lazily" — executed only once.
+   * If the data in localStorage is corrupted (invalid JSON), a warning
+   * is logged and `initialValue` is used instead.
    */
   const [value, setValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
@@ -44,7 +44,7 @@ export function useLocalStorage<T>(
       return item === null ? initialValue : (JSON.parse(item) as T);
     } catch (error) {
       console.warn(
-        `useLocalStorage: Gagal membaca "${key}" dari localStorage. Data rosak akan diabaikan.`,
+        `useLocalStorage: Failed to read "${key}" from localStorage. Corrupted data will be ignored.`,
         error
       );
       return initialValue;
@@ -52,10 +52,10 @@ export function useLocalStorage<T>(
   });
 
   /**
-   * Auto-persist: setiap kali `key` atau `value` berubah,
-   * nilai baharu akan ditulis ke localStorage.
-   * `JSON.stringify` juga boleh gagal (cth: kuota penuh / private mode),
-   * oleh itu dibalut dengan try/catch.
+   * Auto-persist: every time `key` or `value` changes,
+   * the new value is written to localStorage.
+   * `JSON.stringify` can also fail (e.g. quota exceeded / private mode),
+   * so it is wrapped in a try/catch.
    */
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -66,7 +66,7 @@ export function useLocalStorage<T>(
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.warn(
-        `useLocalStorage: Gagal menyimpan "${key}" ke localStorage.`,
+        `useLocalStorage: Failed to save "${key}" to localStorage.`,
         error
       );
     }

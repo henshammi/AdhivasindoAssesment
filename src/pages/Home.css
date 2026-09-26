@@ -1,17 +1,17 @@
 /* ============================================================
- *  Home — gaya bar carian & penapis (Tahap 6)
+ *  Home — search & filter bar styles (Stage 6)
  * ------------------------------------------------------------
- *  Bar penapis menggunakan flex-wrap supaya susunannya kekal rapi
- *  di desktop (semua dalam satu baris) mahupun mudah alih (select
- *  melipat ke baris baharu secara automatik).
+ *  The filter bar uses flex-wrap so the layout stays tidy on
+ *  desktop (everything in one row) as well as mobile (the selects
+ *  fold onto a new row automatically).
  * ============================================================ */
 
-/* Toolbar carian judul */
+/* Title search toolbar */
 .home-toolbar--search {
   padding: 0 8px 2px;
 }
 
-/* Bar penapis: Label / Assignee / Tarikh Akhir + butang Semula */
+/* Filter bar: Label / Assignee / Due Date + Reset button */
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -21,7 +21,7 @@
   padding: 4px 12px 10px;
 }
 
-/* Setiap select mengisi ruang secara seimbang dan melipat bila perlu */
+/* Each select takes up space evenly and folds when needed */
 .filter-bar__select {
   flex: 1 1 150px;
   max-width: 240px;
@@ -33,13 +33,13 @@
   font-size: 0.88rem;
 }
 
-/* Butang Set Semula penapis */
+/* Filter reset button */
 .filter-bar__reset {
   flex: 0 0 auto;
   margin: 0;
 }
 
-/* Kiraan hasil penapis, cth: "3/7 task dipapar" */
+/* Filter result count, e.g. "3/7 tasks shown" */
 .filter-bar__count {
   margin-left: auto;
   color: var(--ion-color-medium);
@@ -47,7 +47,7 @@
   white-space: nowrap;
 }
 
-/* Skrin sangat sempit — pastikan butang Semula tidak terpotong */
+/* Very narrow screens — keep the Reset button from being cut off */
 @media (max-width: 400px) {
   .filter-bar__reset {
     flex: 1 0 auto;

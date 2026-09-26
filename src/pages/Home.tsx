@@ -22,7 +22,7 @@ import type { DueFilter } from '../utils/filters';
 import type { ColumnId, LabelType, Task } from '../types';
 import './Home.css';
 
-/** Pilihan label untuk penapis board (mengikut definisi types). */
+/** Label options for the board filter (per the types definition). */
 const LABEL_FILTER_OPTIONS: LabelType[] = [
   'Feature',
   'Bug',
@@ -30,43 +30,51 @@ const LABEL_FILTER_OPTIONS: LabelType[] = [
   'Undefined',
 ];
 
+/** Toast color per CRUD action type: Create=green, Update=blue, Delete=red. */
+type ToastColor = 'success' | 'primary' | 'danger';
+
 /**
- * Home — pemilik state utama aplikasi.
- * State tasks diangkat (lifted) ke sini supaya CRUD
- * (Create / Update / Delete) dan drag & drop berkongsi
- * satu punca data yang sama, dipersist ke LocalStorage.
+ * Home — owner of the app's main state.
+ * The tasks state is lifted up here so that CRUD
+ * (Create / Update / Delete) and drag & drop share
+ * the same source of data, persisted to LocalStorage.
  */
 const Home: React.FC = () => {
-  // State tasks dipersist ke LocalStorage di bawah kunci 'kanban-tasks'.
+  // Tasks state persisted to LocalStorage under the key 'kanban-tasks'.
   const [tasks, setTasks] = useLocalStorage<Task[]>(
     'kanban-tasks',
     initialTasks
   );
 
-  // ----- Kawalan modal (CRUD) -----
+  // ----- Modal control (CRUD) -----
   const [isModalOpen, setIsModalOpen] = useState(false);
-  /** `null` = mod Create; objek Task = mod Edit. */
+  /** `null` = Create mode; a Task object = Edit mode. */
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  /** Kolom lalai semasa mod Create (daripada butang "+"). */
+  /** Default column while in Create mode (from the "+" button). */
   const [selectedColumn, setSelectedColumn] = useState<ColumnId>('todo');
 
-  // ----- Toast notifikasi selepas aksi CRUD (poin bonus) -----
+  // ----- Toast notifications after CRUD actions (bonus point) -----
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const showToast = (message: string) => setToastMessage(message);
+  /** Current toast color — set together with the message based on the action type. */
+  const [toastColor, setToastColor] = useState<ToastColor>('success');
+  const showToast = (message: string, color: ToastColor) => {
+    setToastMessage(message);
+    setToastColor(color);
+  };
 
-  // ----- Tahap 6: Penapis & carian task -----
-  /** Teks carian judul daripada IonSearchbar ('' = tiada carian). */
+  // ----- Stage 6: Task filtering & search -----
+  /** Title search text from the IonSearchbar ('' = no search). */
   const [searchQuery, setSearchQuery] = useState('');
-  /** Penapis label; 'all' = semua label. */
+  /** Label filter; 'all' = all labels. */
   const [labelFilter, setLabelFilter] = useState<'all' | LabelType>('all');
-  /** Penapis assignee mengikut ID; 'all' = semua assignee. */
+  /** Assignee filter by ID; 'all' = all assignees. */
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
-  /** Penapis tarikh akhir ('all' = semua tarikh). */
+  /** Due date filter ('all' = all dates). */
   const [dueFilter, setDueFilter] = useState<DueFilter>('all');
 
   /**
-   * Senarai task yang telah disaring — hanya task yang sepadan dengan
-   * carian & penapis aktif dihantar ke Board untuk dipaparkan.
+   * The filtered task list — only tasks matching the active
+   * search & filters are passed to the Board to be displayed.
    */
   const filteredTasks = useMemo(
     () =>
@@ -79,14 +87,14 @@ const Home: React.FC = () => {
     [tasks, searchQuery, labelFilter, assigneeFilter, dueFilter]
   );
 
-  /** true jika ada sebarang carian/penapis aktif pada board. */
+  /** true when any search/filter is active on the board. */
   const isFilterActive =
     searchQuery.trim() !== '' ||
     labelFilter !== 'all' ||
     assigneeFilter !== 'all' ||
     dueFilter !== 'all';
 
-  /** Set semula semua carian & penapis kepada nilai lalai. */
+  /** Reset all search & filters back to their default values. */
   const resetFilters = () => {
     setSearchQuery('');
     setLabelFilter('all');
@@ -94,26 +102,26 @@ const Home: React.FC = () => {
     setDueFilter('all');
   };
 
-  /** Buka modal dalam mod Create untuk satu kolom (butang "+" board). */
+  /** Open the modal in Create mode for a given column (board "+" button). */
   const handleOpenCreate = (columnId: ColumnId) => {
     setSelectedTask(null);
     setSelectedColumn(columnId);
     setIsModalOpen(true);
   };
 
-  /** Buka modal dalam mod Edit apabila card task diklik. */
+  /** Open the modal in Edit mode when a task card is clicked. */
   const handleOpenEdit = (task: Task) => {
     setSelectedTask(task);
     setIsModalOpen(true);
   };
 
-  /** Tutup modal (butang X / Batal / backdrop). */
+  /** Close the modal (X button / Cancel / backdrop). */
   const handleCloseModal = () => setIsModalOpen(false);
 
   /**
-   * Simpan task daripada modal:
-   * - Task sedia ada (id wujud dalam array) → Update.
-   * - Task baharu (id kosong) → Create dengan ID `Date.now()`.
+   * Save a task from the modal:
+   * - Existing task (id found in the array) → Update.
+   * - New task (empty id) → Create with an ID from `Date.now()`.
    */
   const handleSave = (task: Task) => {
     const isUpdate = tasks.some((existing) => existing.id === task.id);
@@ -122,20 +130,20 @@ const Home: React.FC = () => {
       setTasks((prev) =>
         prev.map((existing) => (existing.id === task.id ? task : existing))
       );
-      showToast('Task updated successfully');
+      showToast('Task updated successfully', 'primary');
     } else {
       const newTask: Task = { ...task, id: Date.now().toString() };
       setTasks((prev) => [...prev, newTask]);
-      showToast('Task created successfully');
+      showToast('Task created successfully', 'success');
     }
 
     setIsModalOpen(false);
   };
 
-  /** Padam task daripada board (butang Padam dalam modal Edit). */
+  /** Delete a task from the board (Delete button in the Edit modal). */
   const handleDelete = (taskId: string) => {
     setTasks((prev) => prev.filter((existing) => existing.id !== taskId));
-    showToast('Task deleted successfully');
+    showToast('Task deleted successfully', 'danger');
     setIsModalOpen(false);
   };
 
@@ -146,7 +154,7 @@ const Home: React.FC = () => {
           <IonTitle>Task Management Board</IonTitle>
         </IonToolbar>
 
-        {/* Tahap 6: carian task mengikut judul */}
+        {/* Stage 6: search tasks by title */}
         <IonToolbar className="home-toolbar--search">
           <IonSearchbar
             value={searchQuery}
@@ -158,7 +166,7 @@ const Home: React.FC = () => {
           />
         </IonToolbar>
 
-        {/* Tahap 6: penapis Label / Assignee / Tarikh Akhir */}
+        {/* Stage 6: Label / Assignee / Due Date filters */}
         <IonToolbar className="home-toolbar--filters">
           <div className="filter-bar">
             <IonSelect
@@ -214,7 +222,7 @@ const Home: React.FC = () => {
               <IonSelectOption value="week">Next 7 Days</IonSelectOption>
             </IonSelect>
 
-            {/* Set semula semua carian & penapis */}
+            {/* Reset all search & filters */}
             <IonButton
               className="filter-bar__reset"
               fill="clear"
@@ -226,7 +234,7 @@ const Home: React.FC = () => {
               Reset
             </IonButton>
 
-            {/* Kiraan task terpapar semasa penapis aktif */}
+            {/* Visible task count while a filter is active */}
             {isFilterActive && (
               <span className="filter-bar__count">
                 {filteredTasks.length}/{tasks.length} tasks shown
@@ -250,7 +258,7 @@ const Home: React.FC = () => {
         />
       </IonContent>
 
-      {/* Modal CRUD — dirender dalam IonPage seperti disyaratkan Ionic React */}
+      {/* CRUD modal — rendered inside IonPage as required by Ionic React */}
       <TaskModal
         isOpen={isModalOpen}
         task={selectedTask}
@@ -260,14 +268,14 @@ const Home: React.FC = () => {
         onDelete={handleDelete}
       />
 
-      {/* Toast selepas setiap aksi Create / Update / Delete (poin bonus) */}
+      {/* Toast after each Create / Update / Delete action (bonus point) */}
       <IonToast
         isOpen={toastMessage !== null}
         message={toastMessage ?? undefined}
         onDidDismiss={() => setToastMessage(null)}
         duration={2000}
         position="top"
-        color="dark"
+        color={toastColor}
       />
     </IonPage>
   );

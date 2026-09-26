@@ -1,32 +1,32 @@
 /**
  * ============================================================
- *  Utiliti Penapis Task — Task Management Board
+ *  Task Filter Utilities — Task Management Board
  * ------------------------------------------------------------
- *  Fungsi tulen (pure) untuk menyaring senarai task berdasarkan
- *  kriteria carian judul, label, assignee dan tarikh akhir.
- *  Dipanggil oleh Home sebelum senarai task dihantar ke Board,
- *  supaya kolom hanya memaparkan task yang sepadan.
+ *  Pure functions to filter the task list based on
+ *  title search, label, assignee and due date criteria.
+ *  Called by Home before the task list is passed to the Board,
+ *  so columns only show the matching tasks.
  * ============================================================
  */
 
 import type { LabelType, Task } from '../types';
 
-/** Pilihan penapis tarikh akhir. */
+/** Due date filter options. */
 export type DueFilter = 'all' | 'overdue' | 'today' | 'week';
 
-/** Kriteria penapis/carian aktif pada board. */
+/** Active filter/search criteria on the board. */
 export interface TaskFilterCriteria {
-  /** Carian teks pada judul task (tidak peka huruf besar/kecil). */
+  /** Text search on the task title (case-insensitive). */
   query: string;
-  /** Label yang dipilih; `null` = semua label. */
+  /** Selected label; `null` = all labels. */
   label: LabelType | null;
-  /** ID assignee yang dipilih; `null` = semua assignee. */
+  /** Selected assignee ID; `null` = all assignees. */
   assigneeId: string | null;
-  /** Penapis tarikh akhir. */
+  /** Due date filter. */
   due: DueFilter;
 }
 
-/** Bina rentetan tarikh tempatan "YYYY-MM-DD" daripada objek Date. */
+/** Build a local "YYYY-MM-DD" date string from a Date object. */
 const toLocalISODate = (date: Date): string => {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -34,7 +34,7 @@ const toLocalISODate = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-/** Tambah beberapa hari kepada tarikh hari ini dan kembalikan ISO tempatan. */
+/** Add a number of days to today's date and return the local ISO date. */
 const addDaysFromToday = (days: number): string => {
   const next = new Date();
   next.setDate(next.getDate() + days);
@@ -42,15 +42,15 @@ const addDaysFromToday = (days: number): string => {
 };
 
 /**
- * Padankan satu task dengan penapis tarikh akhir.
- * Perbandingan rentetan ISO "YYYY-MM-DD" adalah selamat kerana
- * urutan leksikografinya sama dengan urutan kalendar.
+ * Match a task against the due date filter.
+ * Comparing ISO "YYYY-MM-DD" strings is safe because their
+ * lexicographic order matches the calendar order.
  */
 const matchesDueFilter = (task: Task, due: DueFilter): boolean => {
   if (due === 'all') {
     return true;
   }
-  // Task tanpa tarikh akhir tidak masuk mana-mana penapis tarikh.
+  // Tasks without a due date do not match any date filter.
   if (!task.dueDate) {
     return false;
   }
@@ -58,20 +58,20 @@ const matchesDueFilter = (task: Task, due: DueFilter): boolean => {
   const today = toLocalISODate(new Date());
 
   if (due === 'overdue') {
-    // Tertunggak = tarikh akhir sudah lewat DAN belum selesai
-    // (task dalam kolom "Done" dianggap selesai).
+    // Overdue = due date is in the past AND not completed
+    // (tasks in the "Done" column are considered completed).
     return task.dueDate < today && task.columnId !== 'done';
   }
   if (due === 'today') {
     return task.dueDate === today;
   }
-  // 'week' — tarikh akhir dalam tempoh 7 hari dari hari ini.
+  // 'week' — due date within 7 days from today.
   return task.dueDate >= today && task.dueDate <= addDaysFromToday(7);
 };
 
 /**
- * Saring senarai task mengikut SEMUA kriteria aktif (hubung AND).
- * Kriteria "kosong" (query '' / null / 'all') tidak menyaring apa-apa.
+ * Filter the task list by ALL active criteria (AND logic).
+ * "Empty" criteria (query '' / null / 'all') do not filter anything.
  */
 export const filterTasks = (
   tasks: Task[],
@@ -80,17 +80,17 @@ export const filterTasks = (
   const query = criteria.query.trim().toLowerCase();
 
   return tasks.filter((task) => {
-    // (1) Carian judul — sepadan sebahagian, tidak peka huruf besar/kecil.
+    // (1) Title search — partial match, case-insensitive.
     if (query && !task.title.toLowerCase().includes(query)) {
       return false;
     }
 
-    // (2) Penapis label.
+    // (2) Label filter.
     if (criteria.label && task.label !== criteria.label) {
       return false;
     }
 
-    // (3) Penapis assignee — task perlu mempunyai assignee tersebut.
+    // (3) Assignee filter — the task must include that assignee.
     if (
       criteria.assigneeId &&
       !task.assignees.some((assignee) => assignee.id === criteria.assigneeId)
@@ -98,7 +98,7 @@ export const filterTasks = (
       return false;
     }
 
-    // (4) Penapis tarikh akhir.
+    // (4) Due date filter.
     return matchesDueFilter(task, criteria.due);
   });
 };

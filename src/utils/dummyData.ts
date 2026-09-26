@@ -2,17 +2,17 @@
  * ============================================================
  *  Dummy Data — Task Management Board
  * ------------------------------------------------------------
- *  Set data contoh yang digunakan sebagai nilai awal state
- *  sebelum pengguna membuat sebarang perubahan. Data ini akan
- *  ditulis ke LocalStorage oleh `useLocalStorage` apabila
- *  aplikasi dijalankan buat kali pertama.
+ *  Sample data used as the initial state value before
+ *  the user makes any changes. This data is written to
+ *  LocalStorage by `useLocalStorage` when the app runs
+ *  for the first time.
  * ============================================================
  */
 
 import type { Assignee, Task } from '../types';
 
 /* ------------------------------------------------------------
- * Senarai ahli pasukan contoh
+ * Sample team member list
  * ---------------------------------------------------------- */
 
 const assigneeRizky: Assignee = {
@@ -39,7 +39,7 @@ const assigneeSiti: Assignee = {
   avatar: 'https://i.pravatar.cc/80?img=32',
 };
 
-// Tanpa gambar avatar — TaskCard akan memaparkan inisial berwarna.
+// No avatar picture — TaskCard will display colored initials.
 const assigneeBudi: Assignee = {
   id: 'usr-5',
   name: 'Budi Santoso',
@@ -47,8 +47,8 @@ const assigneeBudi: Assignee = {
 };
 
 /**
- * Senarai ahli pasukan contoh — akan dipakai sebagai pilihan
- * "Filter by Assignee" pada fasa seterusnya.
+ * Sample team member list — used as the options for
+ * the "Filter by Assignee" feature.
  */
 export const initialAssignees: Assignee[] = [
   assigneeRizky,
@@ -59,7 +59,7 @@ export const initialAssignees: Assignee[] = [
 ];
 
 /* ------------------------------------------------------------
- * Data task permulaan — diedarkan merentasi kelima-lima kolom
+ * Initial task data — spread across all five columns
  * ---------------------------------------------------------- */
 
 export const initialTasks: Task[] = [
@@ -149,7 +149,7 @@ export const initialTasks: Task[] = [
       { id: 'task-5-s3', title: 'Verify board works end-to-end', completed: true },
     ],
     attachments: [],
-    // Poin bonus: contoh card dengan gambar muka depan (cover image).
+    // Bonus point: sample card with a cover image.
     coverImage: 'https://picsum.photos/seed/adhivasindo-board/640/240',
   },
   {
@@ -159,7 +159,7 @@ export const initialTasks: Task[] = [
       'README is outdated — document the new scripts, environment variables and the local storage data structure.',
     columnId: 'done',
     label: 'Undefined',
-    // `priority` sengaja dibiarkan kosong — medan ini opsional.
+    // `priority` is intentionally left empty — this field is optional.
     assignees: [assigneeBudi],
     dueDate: '2026-09-18',
     subtasks: [

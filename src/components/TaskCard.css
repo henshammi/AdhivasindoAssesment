@@ -1,5 +1,5 @@
 /* ============================================================
-   TaskCard — visual card task pada board kanban
+   TaskCard — the visual task card on the kanban board
    ============================================================ */
 
 .task-card {
@@ -10,11 +10,11 @@
   transition:
     box-shadow 120ms ease-in-out,
     transform 120ms ease-in-out;
-  /* Card boleh diklik untuk membuka modal Edit */
+  /* Card is clickable to open the Edit modal */
   cursor: pointer;
 }
 
-/* Keadaan semasa card sedang ditarik (drag & drop) */
+/* State while the card is being dragged (drag & drop) */
 .task-card--dragging {
   position: relative;
   z-index: 10;
@@ -27,7 +27,7 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
 }
 
-/* Poin bonus: gambar muka depan card */
+/* Bonus point: card cover image */
 .task-card__cover {
   display: block;
   width: 100%;
@@ -37,7 +37,7 @@
 }
 
 /* ------------------------------------------------------------
-   Header — label badge & tajuk
+   Header — label badge & title
    ---------------------------------------------------------- */
 
 .task-card__header {
@@ -63,12 +63,12 @@
   font-size: 0.95rem;
   font-weight: 700;
   line-height: 1.35;
-  /* Batalkan pemotongan teks (ellipsis) supaya tajuk panjang boleh wrap */
+  /* Cancel text truncation (ellipsis) so long titles can wrap */
   white-space: normal;
 }
 
 /* ------------------------------------------------------------
-   Kandungan — due date, checklist, attachment, progress
+   Content — due date, checklist, attachment, progress
    ---------------------------------------------------------- */
 
 .task-card__content {
@@ -94,7 +94,7 @@
   font-size: 1rem;
 }
 
-/* Tarikh akhir yang sudah lepas dipapar dalam warna merah */
+/* Past due dates are shown in red */
 .task-card__due--overdue {
   color: var(--ion-color-danger);
   font-weight: 600;
@@ -107,7 +107,7 @@
 }
 
 /* ------------------------------------------------------------
-   Footer — senarai assignee (avatar bertindih)
+   Footer — assignee list (overlapping avatars)
    ---------------------------------------------------------- */
 
 .task-card__assignees {
@@ -129,7 +129,7 @@
   margin-left: 0;
 }
 
-/* Inisial dalam avatar apabila tiada gambar profil */
+/* Initials inside the avatar when there is no profile picture */
 .task-card__avatar-initials {
   display: flex;
   align-items: center;

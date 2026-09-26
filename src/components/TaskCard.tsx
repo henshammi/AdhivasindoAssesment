@@ -18,10 +18,10 @@ import type { Assignee, LabelType, PriorityType, Task } from '../types';
 import './TaskCard.css';
 
 /* ------------------------------------------------------------
- * Pemetaan warna & helper kecil
+ * Color mappings & small helpers
  * ---------------------------------------------------------- */
 
-/** Warna Ionic bagi setiap label task. */
+/** Ionic color for each task label. */
 const LABEL_COLORS: Record<LabelType, string> = {
   Feature: 'primary',
   Bug: 'danger',
@@ -29,14 +29,14 @@ const LABEL_COLORS: Record<LabelType, string> = {
   Undefined: 'medium',
 };
 
-/** Warna Ionic bagi keutamaan (opsional) task. */
+/** Ionic color for the task priority (optional). */
 const PRIORITY_COLORS: Record<PriorityType, string> = {
   Low: 'medium',
   Medium: 'warning',
   High: 'danger',
 };
 
-/** Palet warna latar untuk avatar inisial. */
+/** Background color palette for initials avatars. */
 const AVATAR_COLORS = [
   'primary',
   'secondary',
@@ -46,13 +46,13 @@ const AVATAR_COLORS = [
   'danger',
 ];
 
-/** Pilih warna avatar secara deterministik berdasarkan ID assignee. */
+/** Pick the avatar color deterministically based on the assignee ID. */
 const avatarColorFor = (id: string): string => {
   const sum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return AVATAR_COLORS[sum % AVATAR_COLORS.length] ?? 'primary';
 };
 
-/** Dapatkan inisial nama, cth: "Rizky Pratama" -> "RP". */
+/** Get name initials, e.g. "Rizky Pratama" -> "RP". */
 const getInitials = (name: string): string =>
   name
     .trim()
@@ -62,7 +62,7 @@ const getInitials = (name: string): string =>
     .join('')
     .toUpperCase();
 
-/** Singkatan bulan untuk paparan tarikh pendek. */
+/** Month abbreviations for the short date display. */
 const MONTHS_SHORT = [
   'Jan',
   'Feb',
@@ -79,9 +79,9 @@ const MONTHS_SHORT = [
 ];
 
 /**
- * Format tarikh ISO ("2026-09-30") kepada bentuk pendek "30 Sep".
- * Pemformatan dilakukan secara manual bagi mengelakkan anjakan
- * zon waktu pada rentetan "YYYY-MM-DD".
+ * Format an ISO date ("2026-09-30") into the short form "30 Sep".
+ * The formatting is done manually to avoid timezone
+ * shifts on "YYYY-MM-DD" strings.
  */
 const formatDueDate = (isoDate: string): string => {
   const [year, month, day] = isoDate.split('-').map(Number);
@@ -92,7 +92,7 @@ const formatDueDate = (isoDate: string): string => {
   return monthName ? `${day} ${monthName}` : isoDate;
 };
 
-/** Tentukan sama ada tarikh akhir sudah lepas (overdue). */
+/** Determine whether the due date is in the past (overdue). */
 const isOverdue = (isoDate: string): boolean => {
   const [year, month, day] = isoDate.split('-').map(Number);
   if (!year || !month || !day) {
@@ -105,7 +105,7 @@ const isOverdue = (isoDate: string): boolean => {
 };
 
 /* ------------------------------------------------------------
- * Avatar assignee — gambar jika ada, inisial berwarna jika tiada
+ * Assignee avatar — picture if available, colored initials otherwise
  * ---------------------------------------------------------- */
 
 interface AssigneeAvatarProps {
@@ -141,15 +141,15 @@ const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({ assignee }) => {
 };
 
 /* ------------------------------------------------------------
- * TaskCard — visual card task pada board.
- * Keadaan drag dikawal oleh wrapper Draggable di Board.
+ * TaskCard — the visual task card on the board.
+ * The drag state is controlled by the Draggable wrapper in Board.
  * ---------------------------------------------------------- */
 
 interface TaskCardProps {
   task: Task;
-  /** true semasa card sedang ditarik (drag) — bayang lebih jelas. */
+  /** true while the card is being dragged — clearer shadow. */
   isDragging?: boolean;
-  /** Klik card — membuka modal Edit (TaskModal) di parent. */
+  /** Card click — opens the Edit modal (TaskModal) in the parent. */
   onClick?: () => void;
 }
 
@@ -169,7 +169,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       className={`task-card${isDragging ? ' task-card--dragging' : ''}`}
       onClick={onClick}
       onKeyDown={(event) => {
-        // Aksesibiliti: card boleh diaktifkan dengan kekunci Enter.
+        // Accessibility: the card can be activated with the Enter key.
         if (onClick && event.key === 'Enter') {
           onClick();
         }
@@ -177,7 +177,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      {/* Poin bonus: gambar muka depan card (jika ditetapkan) */}
+      {/* Bonus point: card cover image (when set) */}
       {task.coverImage && (
         <img
           src={task.coverImage}
@@ -199,7 +199,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       </IonCardHeader>
 
       <IonCardContent className="task-card__content">
-        {/* Baris meta: due date, progress checklist, bilangan attachment */}
+        {/* Meta row: due date, checklist progress, attachment count */}
         <div className="task-card__row">
           <span
             className={`task-card__meta-item task-card__due${
@@ -225,7 +225,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           )}
         </div>
 
-        {/* Progress bar automatik daripada subtask yang selesai */}
+        {/* Progress bar computed automatically from completed subtasks */}
         {totalSubtasks > 0 && (
           <IonProgressBar
             className="task-card__progress"
@@ -234,7 +234,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           />
         )}
 
-        {/* Senarai assignee dengan avatar bertindih */}
+        {/* Assignee list with overlapping avatars */}
         {task.assignees.length > 0 && (
           <div className="task-card__assignees">
             {task.assignees.map((assignee) => (

@@ -29,15 +29,15 @@ import { COLUMN_IDS, COLUMN_TITLES } from '../utils/columns';
 import type { ColumnId, LabelType, PriorityType, Subtask, Task } from '../types';
 import './TaskModal.css';
 
-/** Pilihan label task mengikut definisi types. */
+/** Task label options per the types definition. */
 const LABEL_OPTIONS: LabelType[] = ['Feature', 'Bug', 'Issue', 'Undefined'];
 
-/** Pilihan tahap keutamaan task (opsional). */
+/** Task priority level options (optional). */
 const PRIORITY_OPTIONS: PriorityType[] = ['Low', 'Medium', 'High'];
 
 /**
- * Nama fail dummy untuk butang "Add Dummy File" — berkitar mengikut
- * bilangan lampiran sedia ada (tiada muat naik fail sebenar).
+ * Dummy file names for the "Add Dummy File" button — they cycle
+ * based on the number of existing attachments (no real file upload).
  */
 const DUMMY_ATTACHMENT_NAMES = [
   'document.pdf',
@@ -46,25 +46,25 @@ const DUMMY_ATTACHMENT_NAMES = [
   'report.docx',
 ];
 
-/** Bentuk state dalaman borang modal. */
+/** Shape of the modal form's internal state. */
 interface TaskFormState {
   title: string;
   description: string;
   columnId: ColumnId;
   label: LabelType;
-  /** '' bermaksud tiada keutamaan (field `priority` adalah opsional). */
+  /** '' means no priority (the `priority` field is optional). */
   priority: '' | PriorityType;
   dueDate: string;
-  /** URL imej muka depan card (poin bonus) — '' bermaksud tiada imej. */
+  /** Card cover image URL (bonus point) — '' means no image. */
   coverImage: string;
-  /** ID assignee terpilih — dipetakan semula ke objek penuh semasa simpan. */
+  /** Selected assignee IDs — mapped back to full objects on save. */
   assigneeIds: string[];
   subtasks: Subtask[];
-  /** Nama fail lampiran (dummy — tiada muat naik sebenar). */
+  /** Attachment file names (dummy — no real upload). */
   attachments: string[];
 }
 
-/** Bina borang kosong untuk mod Create. */
+/** Build an empty form for Create mode. */
 const createEmptyForm = (defaultColumn: ColumnId): TaskFormState => ({
   title: '',
   description: '',
@@ -79,24 +79,24 @@ const createEmptyForm = (defaultColumn: ColumnId): TaskFormState => ({
 });
 
 interface TaskModalProps {
-  /** Modal terbuka atau tidak. */
+  /** Whether the modal is open. */
   isOpen: boolean;
-  /** Tutup modal (butang X, butang Batal, atau backdrop). */
+  /** Close the modal (X button, Cancel button, or backdrop). */
   onClose: () => void;
-  /** Task yang sedang diedit — `null` bermaksud mod Create. */
+  /** Task being edited — `null` means Create mode. */
   task: Task | null;
-  /** Kolom lalai semasa mod Create (daripada butang "+" header kolom). */
+  /** Default column while in Create mode (from the column header "+" button). */
   defaultColumn: ColumnId;
-  /** Simpan task — Create/Update diputuskan oleh parent (Home). */
+  /** Save the task — Create/Update is decided by the parent (Home). */
   onSave: (task: Task) => void;
-  /** Padam task — hanya digunakan dalam mod Edit. */
+  /** Delete the task — only used in Edit mode. */
   onDelete: (taskId: string) => void;
 }
 
 /**
- * TaskModal — borang detail task untuk Create, Edit & Delete.
- * Semua suntingan dipegang dalam state dalaman dan hanya
- * dihantar ke parent (Home) apabila butang "Simpan" ditekan.
+ * TaskModal — task detail form for Create, Edit & Delete.
+ * All edits are held in internal state and are only
+ * submitted to the parent (Home) when the "Save" button is pressed.
  */
 const TaskModal: React.FC<TaskModalProps> = ({
   isOpen,
@@ -111,14 +111,14 @@ const TaskModal: React.FC<TaskModalProps> = ({
   );
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
-  // Segerak borang setiap kali modal dibuka (mod Create atau mod Edit).
+  // Sync the form every time the modal opens (Create or Edit mode).
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
     if (task) {
-      // Mod Edit — praisi semua field daripada task sedia ada.
+      // Edit mode — pre-fill all fields from the existing task.
       setForm({
         title: task.title,
         description: task.description,
@@ -132,24 +132,24 @@ const TaskModal: React.FC<TaskModalProps> = ({
         attachments: [...task.attachments],
       });
     } else {
-      // Mod Create — borang kosong dengan kolom lalai.
+      // Create mode — empty form with the default column.
       setForm(createEmptyForm(defaultColumn));
     }
 
     setNewSubtaskTitle('');
   }, [isOpen, task, defaultColumn]);
 
-  /** Kemas kini sebahagian field borang secara seragam. */
+  /** Update some form fields uniformly. */
   const patchForm = (patch: Partial<TaskFormState>) => {
     setForm((prev) => ({ ...prev, ...patch }));
   };
 
-  // Kiraan subtask selesai — dipapar pada header checklist.
+  // Completed subtask count — shown in the checklist header.
   const completedCount = form.subtasks.filter(
     (subtask) => subtask.completed
   ).length;
 
-  /** Tambah subtask baharu ke dalam senarai semak. */
+  /** Add a new subtask to the checklist. */
   const handleAddSubtask = () => {
     const trimmedTitle = newSubtaskTitle.trim();
     if (!trimmedTitle) {
@@ -170,7 +170,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     setNewSubtaskTitle('');
   };
 
-  /** Togol status selesai / belum selesai bagi satu subtask. */
+  /** Toggle the completed / pending status of a subtask. */
   const handleToggleSubtask = (subtaskId: string) => {
     patchForm({
       subtasks: form.subtasks.map((subtask) =>
@@ -181,7 +181,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     });
   };
 
-  /** Buang satu subtask daripada senarai semak. */
+  /** Remove a subtask from the checklist. */
   const handleRemoveSubtask = (subtaskId: string) => {
     patchForm({
       subtasks: form.subtasks.filter((subtask) => subtask.id !== subtaskId),
@@ -189,8 +189,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
   };
 
   /**
-   * Tambah satu fail dummy ke dalam senarai lampiran — simulasi
-   * "browse from device" tanpa muat naik fail sebenar.
+   * Add a dummy file to the attachments list — simulates
+   * "browse from device" without any real file upload.
    */
   const handleAddDummyFile = () => {
     const dummyName =
@@ -200,7 +200,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     patchForm({ attachments: [...form.attachments, dummyName] });
   };
 
-  /** Buang satu lampiran daripada senarai (mengikut indeks). */
+  /** Remove an attachment from the list (by index). */
   const handleRemoveAttachment = (index: number) => {
     patchForm({
       attachments: form.attachments.filter((_, i) => i !== index),
@@ -208,8 +208,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
   };
 
   /**
-   * Hantar borang — bina objek Task yang lengkap.
-   * `id: ''` dalam mod Create; Home akan menjana ID sebenar.
+   * Submit the form — build the complete Task object.
+   * `id: ''` in Create mode; Home will generate the real ID.
    */
   const handleSaveClick = () => {
     const savedTask: Task = {
@@ -231,7 +231,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     onSave(savedTask);
   };
 
-  /** Padam task — hanya tersedia dalam mod Edit. */
+  /** Delete the task — only available in Edit mode. */
   const handleDeleteClick = () => {
     if (task) {
       onDelete(task.id);
@@ -253,7 +253,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
 
       <IonContent className="task-modal__content">
         <IonList inset className="task-modal__fields">
-          {/* Judul task */}
+          {/* Task title */}
           <IonItem>
             <IonInput
               label="Task Title"
@@ -265,7 +265,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             />
           </IonItem>
 
-          {/* Deskripsi task */}
+          {/* Task description */}
           <IonItem>
             <IonTextarea
               label="Description"
@@ -280,7 +280,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             />
           </IonItem>
 
-          {/* Poin bonus: URL imej muka depan card (opsional) */}
+          {/* Bonus point: card cover image URL (optional) */}
           <IonItem>
             <IonInput
               className="task-modal__cover-input"
@@ -296,7 +296,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             />
           </IonItem>
 
-          {/* Status / kolom board */}
+          {/* Status / board column */}
           <IonItem>
             <IonSelect
               label="Column"
@@ -315,7 +315,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </IonSelect>
           </IonItem>
 
-          {/* Label kategori */}
+          {/* Category label */}
           <IonItem>
             <IonSelect
               label="Label"
@@ -334,7 +334,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </IonSelect>
           </IonItem>
 
-          {/* Prioriti (opsional) */}
+          {/* Priority (optional) */}
           <IonItem>
             <IonSelect
               label="Priority"
@@ -354,7 +354,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </IonSelect>
           </IonItem>
 
-          {/* Tarikh akhir (due date) */}
+          {/* Due date */}
           <IonItem>
             <IonInput
               label="Due Date"
@@ -365,7 +365,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             />
           </IonItem>
 
-          {/* Assignees — pilihan daripada senarai pasukan */}
+          {/* Assignees — options from the team list */}
           <IonItem>
             <IonSelect
               label="Assignee"
@@ -385,7 +385,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           </IonItem>
         </IonList>
 
-        {/* ----- Bahagian Checklist / Subtasks ----- */}
+        {/* ----- Checklist / Subtasks section ----- */}
         <div className="task-modal__checklist">
           <div className="task-modal__checklist-header">
             <h3>Checklist</h3>
@@ -419,7 +419,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </IonList>
           )}
 
-          {/* Baris tambah subtask baharu */}
+          {/* Row to add a new subtask */}
           <div className="task-modal__add-subtask">
             <IonInput
               className="task-modal__add-subtask-input"
@@ -443,7 +443,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           </div>
         </div>
 
-        {/* ----- Bahagian Lampiran (dummy) ----- */}
+        {/* ----- Attachments section (dummy) ----- */}
         <div className="task-modal__attachments">
           <div className="task-modal__attachments-header">
             <h3>Attachments</h3>
@@ -453,7 +453,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </IonButton>
           </div>
 
-          {/* Area dummy drag & drop — hanya UI, tiada muat naik sebenar */}
+          {/* Dummy drag & drop area — UI only, no real upload */}
           <div
             className="task-modal__dropzone"
             role="button"
@@ -472,7 +472,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </p>
           </div>
 
-          {/* Senarai nama fail — hanya dipapar jika ada lampiran */}
+          {/* File name list — only shown when there are attachments */}
           {form.attachments.length > 0 && (
             <IonList inset className="task-modal__attachment-list">
               {form.attachments.map((fileName, index) => (
@@ -501,7 +501,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
         </div>
       </IonContent>
 
-      {/* Footer: Padam (mod Edit sahaja) + Simpan */}
+      {/* Footer: Delete (Edit mode only) + Save */}
       <IonFooter className="task-modal__footer">
         <IonToolbar>
           <IonButtons slot="start">

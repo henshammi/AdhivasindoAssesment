@@ -153,5 +153,38 @@ describe('TaskModal', () => {
     expect(savedTask.title).toBe('Task dengan imej');
     expect(savedTask.coverImage).toBe('https://contoh.com/imej.jpg');
   });
+
+  test('lampiran dummy: butang Add Dummy File menambah nama fail & disimpan bersama task', async () => {
+    const onSave = vi.fn();
+    await renderOpenModal(null, 'todo', {
+      onClose: vi.fn(),
+      onSave,
+      onDelete: vi.fn(),
+    });
+
+    // Area dummy dropzone dipaparkan (UI sahaja).
+    expect(
+      screen.getByText('Drag & Drop files here or browse from device')
+    ).toBeTruthy();
+
+    // Tambah dua fail dummy melalui butang Add Dummy File.
+    fireEvent.click(screen.getByText('Add Dummy File'));
+    fireEvent.click(screen.getByText('Add Dummy File'));
+
+    // Isi judul supaya butang Save aktif, kemudian simpan.
+    const titleInput = document.querySelector('ion-input');
+    await fireEvent(
+      titleInput as Element,
+      new CustomEvent('ionInput', {
+        detail: { value: 'Task dengan lampiran' },
+      })
+    );
+    fireEvent.click(screen.getByText('Save'));
+
+    const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
+    expect(savedTask.attachments).toHaveLength(2);
+    expect(savedTask.attachments[0]).toBe('document.pdf');
+    expect(savedTask.attachments[1]).toBe('image.png');
+  });
 });
 

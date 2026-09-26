@@ -44,3 +44,25 @@ describe('TaskCard — imej muka depan (poin bonus)', () => {
     expect(container.querySelector('.task-card__cover')).toBeNull();
   });
 });
+
+describe('TaskCard — penunjuk lampiran (attachments)', () => {
+  test('memaparkan ikon & jumlah fail apabila attachments tidak kosong', () => {
+    const { container } = render(
+      <TaskCard
+        task={makeTask({
+          id: 'c',
+          attachments: ['design-spec.pdf', 'crash-report.txt'],
+        })}
+      />
+    );
+
+    const indicator = container.querySelector('.task-card__attachments');
+    expect(indicator).not.toBeNull();
+    expect(indicator?.textContent).toBe('2');
+  });
+
+  test('tiada penunjuk lampiran apabila attachments kosong', () => {
+    const { container } = render(<TaskCard task={makeTask({ id: 'd' })} />);
+    expect(container.querySelector('.task-card__attachments')).toBeNull();
+  });
+});

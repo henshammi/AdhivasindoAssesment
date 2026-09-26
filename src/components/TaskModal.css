@@ -57,6 +57,65 @@
   --padding-end: 10px;
 }
 
+/* ----- Bahagian Lampiran (dummy) ----- */
+
+.task-modal__attachments {
+  padding: 0 16px 24px;
+}
+
+.task-modal__attachments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 8px 4px;
+}
+
+.task-modal__attachments-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Area dummy drag & drop — border putus-putus seperti imej referensi */
+.task-modal__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px;
+  padding: 24px 16px;
+  border: 2px dashed var(--ion-color-medium);
+  border-radius: 12px;
+  background: var(--ion-color-light);
+  color: var(--ion-color-medium);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.task-modal__dropzone:hover,
+.task-modal__dropzone:focus-visible {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+}
+
+.task-modal__dropzone ion-icon {
+  font-size: 28px;
+}
+
+.task-modal__dropzone-text {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+/* Nama fail lampiran — elips apabila nama terlalu panjang */
+.task-modal__attachment-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
 /* ----- Footer: Padam / Batal / Simpan ----- */
 
 .task-modal__footer ion-toolbar {

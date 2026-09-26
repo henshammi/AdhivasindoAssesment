@@ -17,7 +17,13 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { addOutline, closeOutline, trashOutline } from 'ionicons/icons';
+import {
+  addOutline,
+  closeOutline,
+  cloudUploadOutline,
+  documentAttachOutline,
+  trashOutline,
+} from 'ionicons/icons';
 import { initialAssignees } from '../utils/dummyData';
 import { COLUMN_IDS, COLUMN_TITLES } from '../utils/columns';
 import type { ColumnId, LabelType, PriorityType, Subtask, Task } from '../types';
@@ -28,6 +34,17 @@ const LABEL_OPTIONS: LabelType[] = ['Feature', 'Bug', 'Issue', 'Undefined'];
 
 /** Pilihan tahap keutamaan task (opsional). */
 const PRIORITY_OPTIONS: PriorityType[] = ['Low', 'Medium', 'High'];
+
+/**
+ * Nama fail dummy untuk butang "Add Dummy File" — berkitar mengikut
+ * bilangan lampiran sedia ada (tiada muat naik fail sebenar).
+ */
+const DUMMY_ATTACHMENT_NAMES = [
+  'document.pdf',
+  'image.png',
+  'notes.txt',
+  'report.docx',
+];
 
 /** Bentuk state dalaman borang modal. */
 interface TaskFormState {
@@ -43,6 +60,8 @@ interface TaskFormState {
   /** ID assignee terpilih — dipetakan semula ke objek penuh semasa simpan. */
   assigneeIds: string[];
   subtasks: Subtask[];
+  /** Nama fail lampiran (dummy — tiada muat naik sebenar). */
+  attachments: string[];
 }
 
 /** Bina borang kosong untuk mod Create. */
@@ -56,6 +75,7 @@ const createEmptyForm = (defaultColumn: ColumnId): TaskFormState => ({
   coverImage: '',
   assigneeIds: [],
   subtasks: [],
+  attachments: [],
 });
 
 interface TaskModalProps {
@@ -109,6 +129,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
         coverImage: task.coverImage ?? '',
         assigneeIds: task.assignees.map((assignee) => assignee.id),
         subtasks: task.subtasks.map((subtask) => ({ ...subtask })),
+        attachments: [...task.attachments],
       });
     } else {
       // Mod Create — borang kosong dengan kolom lalai.
@@ -168,6 +189,25 @@ const TaskModal: React.FC<TaskModalProps> = ({
   };
 
   /**
+   * Tambah satu fail dummy ke dalam senarai lampiran — simulasi
+   * "browse from device" tanpa muat naik fail sebenar.
+   */
+  const handleAddDummyFile = () => {
+    const dummyName =
+      DUMMY_ATTACHMENT_NAMES[
+        form.attachments.length % DUMMY_ATTACHMENT_NAMES.length
+      ];
+    patchForm({ attachments: [...form.attachments, dummyName] });
+  };
+
+  /** Buang satu lampiran daripada senarai (mengikut indeks). */
+  const handleRemoveAttachment = (index: number) => {
+    patchForm({
+      attachments: form.attachments.filter((_, i) => i !== index),
+    });
+  };
+
+  /**
    * Hantar borang — bina objek Task yang lengkap.
    * `id: ''` dalam mod Create; Home akan menjana ID sebenar.
    */
@@ -184,7 +224,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
       ),
       dueDate: form.dueDate,
       subtasks: form.subtasks,
-      attachments: task?.attachments ?? [],
+      attachments: form.attachments,
       coverImage: form.coverImage.trim() || undefined,
     };
 
@@ -401,6 +441,63 @@ const TaskModal: React.FC<TaskModalProps> = ({
               Add
             </IonButton>
           </div>
+        </div>
+
+        {/* ----- Bahagian Lampiran (dummy) ----- */}
+        <div className="task-modal__attachments">
+          <div className="task-modal__attachments-header">
+            <h3>Attachments</h3>
+            <IonButton size="small" fill="clear" onClick={handleAddDummyFile}>
+              <IonIcon slot="start" icon={addOutline} />
+              Add Dummy File
+            </IonButton>
+          </div>
+
+          {/* Area dummy drag & drop — hanya UI, tiada muat naik sebenar */}
+          <div
+            className="task-modal__dropzone"
+            role="button"
+            tabIndex={0}
+            aria-label="Drag and drop files here or browse from device (demo)"
+            onClick={handleAddDummyFile}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                handleAddDummyFile();
+              }
+            }}
+          >
+            <IonIcon icon={cloudUploadOutline} aria-hidden="true" />
+            <p className="task-modal__dropzone-text">
+              Drag &amp; Drop files here or browse from device
+            </p>
+          </div>
+
+          {/* Senarai nama fail — hanya dipapar jika ada lampiran */}
+          {form.attachments.length > 0 && (
+            <IonList inset className="task-modal__attachment-list">
+              {form.attachments.map((fileName, index) => (
+                <IonItem key={`${fileName}-${index}`}>
+                  <IonIcon
+                    slot="start"
+                    icon={documentAttachOutline}
+                    aria-hidden="true"
+                  />
+                  <span className="task-modal__attachment-name">
+                    {fileName}
+                  </span>
+                  <IonButton
+                    slot="end"
+                    fill="clear"
+                    color="medium"
+                    aria-label={`Remove attachment: ${fileName}`}
+                    onClick={() => handleRemoveAttachment(index)}
+                  >
+                    <IonIcon slot="icon-only" icon={trashOutline} />
+                  </IonButton>
+                </IonItem>
+              ))}
+            </IonList>
+          )}
         </div>
       </IonContent>
 

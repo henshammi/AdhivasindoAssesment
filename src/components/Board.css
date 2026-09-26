@@ -1,0 +1,122 @@
+/* ============================================================
+   Board — layout kanban 5 kolom dengan scroll mendatar
+   ============================================================ */
+
+.board {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ------------------------------------------------------------
+   Kolom
+   ---------------------------------------------------------- */
+
+.board__column {
+  flex: 0 0 280px;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--ion-color-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.board__column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 6px 12px;
+}
+
+.board__column-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ion-text-color);
+}
+
+/* Bilangan task dalam kolom */
+.board__column-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--ion-color-medium);
+  color: var(--ion-color-medium-contrast);
+}
+
+/* Tombol "+" placeholder untuk tambah task nanti */
+.board__add-button {
+  --margin-start: 0;
+  --margin-end: 0;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
+/* Badan kolom — senarai card (juga droppable bagi @hello-pangea/dnd) */
+.board__column-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 10px 10px;
+  min-height: 56px;
+}
+
+/* Serlah apabila card ditarik ke atas kolom (drag over) */
+.board__column-body--drag-over {
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
+  border-radius: 8px;
+}
+
+/* Pembungkus card — elemen draggable itu sendiri.
+   dnd mengawal kedudukan melalui inline style. */
+.board__task-wrapper {
+  cursor: grab;
+}
+
+.board__task-wrapper:active {
+  cursor: grabbing;
+}
+
+/* Keadaan kosong apabila tiada task dalam kolom */
+.board__empty {
+  margin: 0;
+  padding: 18px 8px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ion-color-medium);
+  border: 1px dashed var(--ion-color-medium);
+  border-radius: 8px;
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------
+   Responsif — pada skrin kecil, lebar kolom mengikut sebahagian
+   daripada lebar skrin supaya scroll mendatar lebih selesa.
+   ---------------------------------------------------------- */
+@media (max-width: 576px) {
+  .board {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .board__column {
+    flex: 0 0 min(280px, 80vw);
+    max-width: min(280px, 80vw);
+  }
+}

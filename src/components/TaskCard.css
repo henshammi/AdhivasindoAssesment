@@ -1,0 +1,143 @@
+/* ============================================================
+   TaskCard — visual card task pada board kanban
+   ============================================================ */
+
+.task-card {
+  width: 100%;
+  margin: 0;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+  transition:
+    box-shadow 120ms ease-in-out,
+    transform 120ms ease-in-out;
+  /* Card boleh diklik untuk membuka modal Edit */
+  cursor: pointer;
+}
+
+/* Keadaan semasa card sedang ditarik (drag & drop) */
+.task-card--dragging {
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  transform: rotate(2deg);
+  cursor: grabbing;
+}
+
+.task-card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* Poin bonus: gambar muka depan card */
+.task-card__cover {
+  display: block;
+  width: 100%;
+  height: 104px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+/* ------------------------------------------------------------
+   Header — label badge & tajuk
+   ---------------------------------------------------------- */
+
+.task-card__header {
+  padding: 12px 12px 0;
+}
+
+.task-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-card__badges ion-badge {
+  padding: 3px 8px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.task-card__title {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  /* Batalkan pemotongan teks (ellipsis) supaya tajuk panjang boleh wrap */
+  white-space: normal;
+}
+
+/* ------------------------------------------------------------
+   Kandungan — due date, checklist, attachment, progress
+   ---------------------------------------------------------- */
+
+.task-card__content {
+  padding: 8px 12px 12px;
+}
+
+.task-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.task-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.task-card__meta-item ion-icon {
+  font-size: 1rem;
+}
+
+/* Tarikh akhir yang sudah lepas dipapar dalam warna merah */
+.task-card__due--overdue {
+  color: var(--ion-color-danger);
+  font-weight: 600;
+}
+
+.task-card__progress {
+  margin-top: 10px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ------------------------------------------------------------
+   Footer — senarai assignee (avatar bertindih)
+   ---------------------------------------------------------- */
+
+.task-card__assignees {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.task-card__assignees ion-avatar {
+  width: 28px;
+  height: 28px;
+  margin-left: -8px;
+  border: 2px solid
+    var(--ion-card-background, var(--ion-item-background, var(--ion-background-color, #fff)));
+  background: var(--ion-color-light);
+}
+
+.task-card__assignees ion-avatar:first-of-type {
+  margin-left: 0;
+}
+
+/* Inisial dalam avatar apabila tiada gambar profil */
+.task-card__avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 50%;
+}

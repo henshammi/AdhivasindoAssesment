@@ -1,0 +1,68 @@
+# Role & Rules for Cline - Frontend Assessment Adhivasindo
+
+## 🎯 Goal
+
+Membina aplikasi **CRUD Task Management Board (Kanban Board)** menggunakan **Ionic React** dan **LocalStorage** mengikut spesifikasi dokumen ujian PT Adhivasindo.
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework**: Ionic React (React 18+, TypeScript)
+- **Drag & Drop**: `@hello-pangea/dnd`
+- **State/Storage**: React Hooks + LocalStorage
+- **Icons & UI**: `ionicons`, Component `@ionic/react` (`IonCard`, `IonModal`, `IonAvatar`, `IonProgressBar`, `IonToast`)
+
+---
+
+## 📌 Scope & Feature Requirements
+
+### 1. Board & Column
+
+- Mempunyai 5 kolom utama: **To Do**, **Doing**, **Review**, **Done**, dan **Rework**[cite: 1].
+- Boleh menambah list/kolom baharu (mengikut UI rujukan)[cite: 1].
+
+### 2. Task Card Attributes
+
+Setiap task wajib mempunyai struktur data berikut[cite: 1]:
+
+- `id`: string
+- `title`: string
+- `description`: string
+- `columnId`: 'todo' | 'doing' | 'review' | 'done' | 'rework'
+- `label`: 'Feature' | 'Bug' | 'Issue' | 'Undefined'[cite: 1]
+- `priority`: 'Low' | 'Medium' | 'High' (opsional)[cite: 1]
+- `assignees`: Array of `{ id, name, avatar }`[cite: 1]
+- `dueDate`: string[cite: 1]
+- `subtasks`: Array of `{ id, title, completed }`[cite: 1]
+- `attachments`: Array of file names / dummy icons[cite: 1]
+- `coverImage`: string (Poin Bonus)[cite: 1]
+
+### 3. Core Features to Implement
+
+1. **CRUD Task**:
+   - **Create**: Tambah task baharu ke dalam kolom pilihan[cite: 1].
+   - **Read**: Paparkan task card mengikut susun atur UI mockup[cite: 1].
+   - **Update**: Modal Form / Detail View untuk kemaskini semua maklumat task[cite: 1].
+   - **Delete**: Padam task dari board[cite: 1].
+2. **Drag & Drop**: Boleh pindahkan task card antar-kolom secara interaktif menggunakan `@hello-pangea/dnd`[cite: 1].
+3. **Checklist & Progress**: User boleh tambah subtask, tanda selesai/belum, dan progress bar mengira peratusan secara automatik[cite: 1].
+4. **Filtering & Searching**: Penapis berdasarkan _Assignee_, _Label_, atau _Due Date_, serta input carian tajuk[cite: 1].
+5. **Data Persistence**: Simpan semua perubahan state ke `LocalStorage`[cite: 1].
+6. **Toast Notification**: Tampilkan `IonToast` setiap kali selepas aksi Create, Update, atau Delete (Poin Bonus)[cite: 1].
+
+---
+
+## 🎨 UI/UX Guidelines
+
+- Replicate susun atur UI daripada imej rujukan (Kanban board layout + Task detail modal)[cite: 1].
+- Pastikan paparan responsif (selesa di skrin Desktop dan Mobile)[cite: 1].
+- Gunakan komponen Ionic UI asli sebanyak mungkin[cite: 1].
+
+---
+
+## ⛔ Constraints & Strict Rules
+
+- **JANGAN** menggunakan backend API luaran (Gunakan LocalStorage)[cite: 1].
+- **JANGAN** menambah perpustakaan UI lain seperti Tailwind, Bootstrap, atau Material UI kecuali diminta. Utamakan Ionic UI & Ionic CSS utilities[cite: 1].
+- Tulis kod menggunakan **TypeScript** yang kemas dengan pemisahan komponen yang jelas (`components/`, `types/`, `hooks/`, `utils/`).

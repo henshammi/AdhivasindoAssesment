@@ -54,7 +54,7 @@ describe('TaskModal', () => {
       new CustomEvent('ionInput', { detail: { value: 'Task ujian baharu' } })
     );
 
-    fireEvent.click(screen.getByText('Simpan'));
+    fireEvent.click(screen.getByText('Save'));
 
     expect(onSave).toHaveBeenCalledTimes(1);
     const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
@@ -63,6 +63,8 @@ describe('TaskModal', () => {
     expect(savedTask.id).toBe('');
     // Kolom lalai diwarisi daripada prop defaultColumn
     expect(savedTask.columnId).toBe('doing');
+    // Mod Create tanpa URL imej muka → coverImage kekal undefined
+    expect(savedTask.coverImage).toBeUndefined();
   });
 
   test('mod Edit: papar data task sedia ada; butang Padam memanggil onDelete', async () => {
@@ -80,7 +82,7 @@ describe('TaskModal', () => {
     expect(titleInput.value).toBe(task.title);
 
     // Butang Padam hanya wujud dalam mod Edit.
-    fireEvent.click(screen.getByText('Padam'));
+    fireEvent.click(screen.getByText('Delete'));
     expect(onDelete).toHaveBeenCalledWith(task.id);
   });
 
@@ -100,7 +102,7 @@ describe('TaskModal', () => {
       subtaskInput as Element,
       new CustomEvent('ionInput', { detail: { value: 'Subtask ujian' } })
     );
-    fireEvent.click(screen.getByText('Tambah'));
+    fireEvent.click(screen.getByText('Add'));
 
     // Isi judul supaya butang Simpan aktif, kemudian simpan.
     const titleInput = document.querySelector('ion-input');
@@ -110,12 +112,46 @@ describe('TaskModal', () => {
         detail: { value: 'Task dengan checklist' },
       })
     );
-    fireEvent.click(screen.getByText('Simpan'));
+    fireEvent.click(screen.getByText('Save'));
 
     const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
     expect(savedTask.subtasks).toHaveLength(1);
     expect(savedTask.subtasks[0]?.title).toBe('Subtask ujian');
     expect(savedTask.subtasks[0]?.completed).toBe(false);
+  });
+
+  test('poin bonus: URL imej muka diisi & dihantar bersama task semasa Simpan', async () => {
+    const onSave = vi.fn();
+    await renderOpenModal(null, 'todo', {
+      onClose: vi.fn(),
+      onSave,
+      onDelete: vi.fn(),
+    });
+
+    // Isi judul supaya butang Simpan aktif.
+    const titleInput = document.querySelector('ion-input');
+    await fireEvent(
+      titleInput as Element,
+      new CustomEvent('ionInput', { detail: { value: 'Task dengan imej' } })
+    );
+
+    // Isi URL imej muka depan pada input khas (nilai ditrim semasa simpan).
+    const coverInput = document.querySelector(
+      'ion-input.task-modal__cover-input'
+    );
+    expect(coverInput).not.toBeNull();
+    await fireEvent(
+      coverInput as Element,
+      new CustomEvent('ionInput', {
+        detail: { value: '  https://contoh.com/imej.jpg  ' },
+      })
+    );
+
+    fireEvent.click(screen.getByText('Save'));
+
+    const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
+    expect(savedTask.title).toBe('Task dengan imej');
+    expect(savedTask.coverImage).toBe('https://contoh.com/imej.jpg');
   });
 });
 

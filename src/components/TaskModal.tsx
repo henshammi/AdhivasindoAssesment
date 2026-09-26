@@ -38,6 +38,8 @@ interface TaskFormState {
   /** '' bermaksud tiada keutamaan (field `priority` adalah opsional). */
   priority: '' | PriorityType;
   dueDate: string;
+  /** URL imej muka depan card (poin bonus) — '' bermaksud tiada imej. */
+  coverImage: string;
   /** ID assignee terpilih — dipetakan semula ke objek penuh semasa simpan. */
   assigneeIds: string[];
   subtasks: Subtask[];
@@ -51,6 +53,7 @@ const createEmptyForm = (defaultColumn: ColumnId): TaskFormState => ({
   label: 'Undefined',
   priority: '',
   dueDate: '',
+  coverImage: '',
   assigneeIds: [],
   subtasks: [],
 });
@@ -103,6 +106,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
         label: task.label,
         priority: task.priority ?? '',
         dueDate: task.dueDate,
+        coverImage: task.coverImage ?? '',
         assigneeIds: task.assignees.map((assignee) => assignee.id),
         subtasks: task.subtasks.map((subtask) => ({ ...subtask })),
       });
@@ -181,7 +185,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
       dueDate: form.dueDate,
       subtasks: form.subtasks,
       attachments: task?.attachments ?? [],
-      coverImage: task?.coverImage,
+      coverImage: form.coverImage.trim() || undefined,
     };
 
     onSave(savedTask);
@@ -198,9 +202,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
     <IonModal isOpen={isOpen} onDidDismiss={onClose} className="task-modal">
       <IonHeader className="task-modal__header">
         <IonToolbar>
-          <IonTitle>{task ? 'Edit Task' : 'Task Baharu'}</IonTitle>
+          <IonTitle>{task ? 'Edit Task' : 'New Task'}</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={onClose} aria-label="Tutup modal">
+            <IonButton onClick={onClose} aria-label="Close modal">
               <IonIcon slot="icon-only" icon={closeOutline} />
             </IonButton>
           </IonButtons>
@@ -212,21 +216,21 @@ const TaskModal: React.FC<TaskModalProps> = ({
           {/* Judul task */}
           <IonItem>
             <IonInput
-              label="Judul"
+              label="Task Title"
               labelPlacement="stacked"
-              placeholder="Judul task"
+              placeholder="Enter task title"
               value={form.title}
               onIonInput={(e) => patchForm({ title: e.detail.value ?? '' })}
-              helperText={form.title.trim() ? undefined : 'Judul wajib diisi'}
+              helperText={form.title.trim() ? undefined : 'Title is required'}
             />
           </IonItem>
 
           {/* Deskripsi task */}
           <IonItem>
             <IonTextarea
-              label="Deskripsi"
+              label="Description"
               labelPlacement="stacked"
-              placeholder="Keterangan terperinci task…"
+              placeholder="Detailed task description…"
               autoGrow
               rows={3}
               value={form.description}
@@ -236,10 +240,26 @@ const TaskModal: React.FC<TaskModalProps> = ({
             />
           </IonItem>
 
+          {/* Poin bonus: URL imej muka depan card (opsional) */}
+          <IonItem>
+            <IonInput
+              className="task-modal__cover-input"
+              label="Cover Image (URL)"
+              labelPlacement="stacked"
+              type="url"
+              placeholder="https://example.com/image.jpg"
+              value={form.coverImage}
+              onIonInput={(e) =>
+                patchForm({ coverImage: e.detail.value ?? '' })
+              }
+              helperText="Optional — shown at the top of the task card"
+            />
+          </IonItem>
+
           {/* Status / kolom board */}
           <IonItem>
             <IonSelect
-              label="Status"
+              label="Column"
               labelPlacement="stacked"
               interface="popover"
               value={form.columnId}
@@ -277,7 +297,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           {/* Prioriti (opsional) */}
           <IonItem>
             <IonSelect
-              label="Prioriti"
+              label="Priority"
               labelPlacement="stacked"
               interface="popover"
               value={form.priority}
@@ -285,7 +305,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 patchForm({ priority: e.detail.value as '' | PriorityType })
               }
             >
-              <IonSelectOption value="">Tiada</IonSelectOption>
+              <IonSelectOption value="">None</IonSelectOption>
               {PRIORITY_OPTIONS.map((priority) => (
                 <IonSelectOption key={priority} value={priority}>
                   {priority}
@@ -297,7 +317,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           {/* Tarikh akhir (due date) */}
           <IonItem>
             <IonInput
-              label="Tarikh Akhir"
+              label="Due Date"
               labelPlacement="stacked"
               type="date"
               value={form.dueDate}
@@ -330,7 +350,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           <div className="task-modal__checklist-header">
             <h3>Checklist</h3>
             <span>
-              {completedCount}/{form.subtasks.length} selesai
+              {completedCount}/{form.subtasks.length} done
             </span>
           </div>
 
@@ -349,7 +369,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
                     slot="end"
                     fill="clear"
                     color="medium"
-                    aria-label={`Buang subtask: ${subtask.title}`}
+                    aria-label={`Remove subtask: ${subtask.title}`}
                     onClick={() => handleRemoveSubtask(subtask.id)}
                   >
                     <IonIcon slot="icon-only" icon={trashOutline} />
@@ -363,7 +383,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           <div className="task-modal__add-subtask">
             <IonInput
               className="task-modal__add-subtask-input"
-              placeholder="Tambah subtask baharu…"
+              placeholder="Add new subtask…"
               value={newSubtaskTitle}
               onIonInput={(e) => setNewSubtaskTitle(e.detail.value ?? '')}
               onKeyDown={(e) => {
@@ -378,7 +398,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
               disabled={!newSubtaskTitle.trim()}
             >
               <IonIcon slot="start" icon={addOutline} />
-              Tambah
+              Add
             </IonButton>
           </div>
         </div>
@@ -391,16 +411,16 @@ const TaskModal: React.FC<TaskModalProps> = ({
             {task && (
               <IonButton color="danger" onClick={handleDeleteClick}>
                 <IonIcon slot="start" icon={trashOutline} />
-                Padam
+                Delete
               </IonButton>
             )}
           </IonButtons>
           <IonButtons slot="end">
             <IonButton fill="clear" onClick={onClose}>
-              Batal
+              Cancel
             </IonButton>
             <IonButton onClick={handleSaveClick} disabled={!form.title.trim()}>
-              Simpan
+              Save
             </IonButton>
           </IonButtons>
         </IonToolbar>

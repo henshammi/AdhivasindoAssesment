@@ -28,14 +28,18 @@ const isColumnId = (value: string): value is ColumnId =>
  * Alihkan satu task ke kedudukan baharu pada senarai rata tasks.
  * - Dipanggil oleh `handleDragEnd` selepas semua pengesahan dilakukan.
  * - `columnId` task ditukar kepada kolom destinasi.
- * - Kedudukan dalam kolom ditentukan oleh turutan task dalam senarai rata.
+ * - `destinationIndex` merujuk susunan TERPAPAR bagi kolom destinasi
+ *   (selepas penapis), jadi ia dipetakan kepada task jiran ("anchor")
+ *   dalam senarai penuh — drag & drop kekal tepat walaupun penapis
+ *   aktif menyembunyikan sebahagian task.
  */
 const moveTask = (
   tasks: Task[],
   taskId: string,
-  sourceColumnId: ColumnId,
   destinationColumnId: ColumnId,
-  destinationIndex: number
+  destinationIndex: number,
+  /** Task kolom destinasi yang terpapar, tanpa card yang sedang diheret. */
+  visibleDestinationTasks: Task[]
 ): Task[] => {
   const draggedTask = tasks.find((task) => task.id === taskId);
   if (!draggedTask) {
@@ -48,27 +52,38 @@ const moveTask = (
     columnId: destinationColumnId,
   };
 
-  // (i) Susun semula dalam kolom yang sama — hanya tukar kedudukan.
-  if (sourceColumnId === destinationColumnId) {
-    const columnTasks = withoutDragged.filter(
-      (task) => task.columnId === sourceColumnId
+  // (i) Sisip sebelum task jiran ("anchor") pada kedudukan destinasi.
+  //     Index destinasi merujuk susunan terpapar; anchor ialah task
+  //     terpapar pada kedudukan itu (tiada anchor = hujung kolom).
+  const anchorTask = visibleDestinationTasks[destinationIndex];
+  if (anchorTask) {
+    const anchorPosition = withoutDragged.findIndex(
+      (task) => task.id === anchorTask.id
     );
-    columnTasks.splice(destinationIndex, 0, movedTask);
-    const otherTasks = withoutDragged.filter(
-      (task) => task.columnId !== sourceColumnId
-    );
-    return [...otherTasks, ...columnTasks];
+    if (anchorPosition !== -1) {
+      const nextTasks = [...withoutDragged];
+      nextTasks.splice(anchorPosition, 0, movedTask);
+      return nextTasks;
+    }
   }
 
-  // (ii) Pindah ke kolom lain — masukkan pada index destinasi.
-  const destinationTasks = withoutDragged.filter(
-    (task) => task.columnId === destinationColumnId
+  // (ii) Tiada anchor — letak di hujung kolom destinasi, iaitu sebelum
+  //      task pertama kolom-kolom seterusnya mengikut susunan board.
+  const destinationOrder = COLUMN_IDS.indexOf(destinationColumnId);
+  const firstFollowingTask = withoutDragged.find(
+    (task) => COLUMN_IDS.indexOf(task.columnId) > destinationOrder
   );
-  destinationTasks.splice(destinationIndex, 0, movedTask);
-  const remainingTasks = withoutDragged.filter(
-    (task) => task.columnId !== destinationColumnId
-  );
-  return [...remainingTasks, ...destinationTasks];
+  if (firstFollowingTask) {
+    const insertPosition = withoutDragged.findIndex(
+      (task) => task.id === firstFollowingTask.id
+    );
+    const nextTasks = [...withoutDragged];
+    nextTasks.splice(insertPosition, 0, movedTask);
+    return nextTasks;
+  }
+
+  // (iii) Kolom destinasi ialah kolom terakhir — tambah pada hujung senarai.
+  return [...withoutDragged, movedTask];
 };
 
 /**
@@ -110,14 +125,22 @@ const Board: React.FC<BoardProps> = ({
       return;
     }
 
+    // (d) Senarai task yang TERPAPAR bagi kolom destinasi (tanpa card yang
+    //     sedang diheret). Index destinasi dnd merujuk susunan terpapar;
+    //     apabila penapis aktif, ia hanya sebahagian daripada senarai penuh.
+    const visibleDestinationTasks = tasks.filter(
+      (task) =>
+        task.columnId === destinationColumnId && task.id !== draggableId
+    );
+
     // Kemaskini state — LocalStorage ditulis automatik oleh useLocalStorage.
     setTasks((prevTasks) =>
       moveTask(
         prevTasks,
         draggableId,
-        sourceColumnId,
         destinationColumnId,
-        destination.index
+        destination.index,
+        visibleDestinationTasks
       )
     );
   };
@@ -150,7 +173,7 @@ const Board: React.FC<BoardProps> = ({
                   className="board__add-button"
                   fill="clear"
                   size="small"
-                  aria-label={`Tambah task baharu ke kolom ${COLUMN_TITLES[columnId]}`}
+                  aria-label={`Add new task to ${COLUMN_TITLES[columnId]} column`}
                   onClick={() => onAddTask(columnId)}
                 >
                   <IonIcon slot="icon-only" icon={addOutline} />
@@ -193,7 +216,7 @@ const Board: React.FC<BoardProps> = ({
                     ))}
 
                     {columnTasks.length === 0 && !snapshot.isDraggingOver && (
-                      <p className="board__empty">Tiada task</p>
+                      <p className="board__empty">No tasks found</p>
                     )}
 
                     {/* Ruang yang dikosongkan semasa drag — wajib untuk dnd */}

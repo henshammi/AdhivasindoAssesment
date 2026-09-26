@@ -1,18 +1,34 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
+  IonButton,
   IonContent,
   IonHeader,
+  IonIcon,
   IonPage,
+  IonSearchbar,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToast,
   IonToolbar,
 } from '@ionic/react';
+import { refreshOutline } from 'ionicons/icons';
 import Board from '../components/Board';
 import TaskModal from '../components/TaskModal';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { initialTasks } from '../utils/dummyData';
-import type { ColumnId, Task } from '../types';
+import { initialAssignees, initialTasks } from '../utils/dummyData';
+import { filterTasks } from '../utils/filters';
+import type { DueFilter } from '../utils/filters';
+import type { ColumnId, LabelType, Task } from '../types';
 import './Home.css';
+
+/** Pilihan label untuk penapis board (mengikut definisi types). */
+const LABEL_FILTER_OPTIONS: LabelType[] = [
+  'Feature',
+  'Bug',
+  'Issue',
+  'Undefined',
+];
 
 /**
  * Home — pemilik state utama aplikasi.
@@ -37,6 +53,46 @@ const Home: React.FC = () => {
   // ----- Toast notifikasi selepas aksi CRUD (poin bonus) -----
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const showToast = (message: string) => setToastMessage(message);
+
+  // ----- Tahap 6: Penapis & carian task -----
+  /** Teks carian judul daripada IonSearchbar ('' = tiada carian). */
+  const [searchQuery, setSearchQuery] = useState('');
+  /** Penapis label; 'all' = semua label. */
+  const [labelFilter, setLabelFilter] = useState<'all' | LabelType>('all');
+  /** Penapis assignee mengikut ID; 'all' = semua assignee. */
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
+  /** Penapis tarikh akhir ('all' = semua tarikh). */
+  const [dueFilter, setDueFilter] = useState<DueFilter>('all');
+
+  /**
+   * Senarai task yang telah disaring — hanya task yang sepadan dengan
+   * carian & penapis aktif dihantar ke Board untuk dipaparkan.
+   */
+  const filteredTasks = useMemo(
+    () =>
+      filterTasks(tasks, {
+        query: searchQuery,
+        label: labelFilter === 'all' ? null : labelFilter,
+        assigneeId: assigneeFilter === 'all' ? null : assigneeFilter,
+        due: dueFilter,
+      }),
+    [tasks, searchQuery, labelFilter, assigneeFilter, dueFilter]
+  );
+
+  /** true jika ada sebarang carian/penapis aktif pada board. */
+  const isFilterActive =
+    searchQuery.trim() !== '' ||
+    labelFilter !== 'all' ||
+    assigneeFilter !== 'all' ||
+    dueFilter !== 'all';
+
+  /** Set semula semua carian & penapis kepada nilai lalai. */
+  const resetFilters = () => {
+    setSearchQuery('');
+    setLabelFilter('all');
+    setAssigneeFilter('all');
+    setDueFilter('all');
+  };
 
   /** Buka modal dalam mod Create untuk satu kolom (butang "+" board). */
   const handleOpenCreate = (columnId: ColumnId) => {
@@ -66,11 +122,11 @@ const Home: React.FC = () => {
       setTasks((prev) =>
         prev.map((existing) => (existing.id === task.id ? task : existing))
       );
-      showToast(`Task "${task.title}" dikemas kini`);
+      showToast('Task updated successfully');
     } else {
       const newTask: Task = { ...task, id: Date.now().toString() };
       setTasks((prev) => [...prev, newTask]);
-      showToast(`Task "${newTask.title}" ditambah`);
+      showToast('Task created successfully');
     }
 
     setIsModalOpen(false);
@@ -79,7 +135,7 @@ const Home: React.FC = () => {
   /** Padam task daripada board (butang Padam dalam modal Edit). */
   const handleDelete = (taskId: string) => {
     setTasks((prev) => prev.filter((existing) => existing.id !== taskId));
-    showToast('Task dipadam');
+    showToast('Task deleted successfully');
     setIsModalOpen(false);
   };
 
@@ -88,6 +144,95 @@ const Home: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>Task Management Board</IonTitle>
+        </IonToolbar>
+
+        {/* Tahap 6: carian task mengikut judul */}
+        <IonToolbar className="home-toolbar--search">
+          <IonSearchbar
+            value={searchQuery}
+            placeholder="Search tasks..."
+            debounce={150}
+            showClearButton="focus"
+            aria-label="Search tasks by title"
+            onIonInput={(e) => setSearchQuery(e.detail.value ?? '')}
+          />
+        </IonToolbar>
+
+        {/* Tahap 6: penapis Label / Assignee / Tarikh Akhir */}
+        <IonToolbar className="home-toolbar--filters">
+          <div className="filter-bar">
+            <IonSelect
+              className="filter-bar__select"
+              label="Label"
+              labelPlacement="stacked"
+              interface="popover"
+              cancelText="Cancel"
+              value={labelFilter}
+              onIonChange={(e) =>
+                setLabelFilter((e.detail.value ?? 'all') as 'all' | LabelType)
+              }
+            >
+              <IonSelectOption value="all">All Labels</IonSelectOption>
+              {LABEL_FILTER_OPTIONS.map((label) => (
+                <IonSelectOption key={label} value={label}>
+                  {label}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
+
+            <IonSelect
+              className="filter-bar__select"
+              label="Assignee"
+              labelPlacement="stacked"
+              interface="popover"
+              cancelText="Cancel"
+              value={assigneeFilter}
+              onIonChange={(e) => setAssigneeFilter(e.detail.value ?? 'all')}
+            >
+              <IonSelectOption value="all">All Assignees</IonSelectOption>
+              {initialAssignees.map((assignee) => (
+                <IonSelectOption key={assignee.id} value={assignee.id}>
+                  {assignee.name}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
+
+            <IonSelect
+              className="filter-bar__select"
+              label="Due Date"
+              labelPlacement="stacked"
+              interface="popover"
+              cancelText="Cancel"
+              value={dueFilter}
+              onIonChange={(e) =>
+                setDueFilter((e.detail.value ?? 'all') as DueFilter)
+              }
+            >
+              <IonSelectOption value="all">All Due Dates</IonSelectOption>
+              <IonSelectOption value="overdue">Overdue</IonSelectOption>
+              <IonSelectOption value="today">Today</IonSelectOption>
+              <IonSelectOption value="week">Next 7 Days</IonSelectOption>
+            </IonSelect>
+
+            {/* Set semula semua carian & penapis */}
+            <IonButton
+              className="filter-bar__reset"
+              fill="clear"
+              size="small"
+              disabled={!isFilterActive}
+              onClick={resetFilters}
+            >
+              <IonIcon slot="start" icon={refreshOutline} />
+              Reset
+            </IonButton>
+
+            {/* Kiraan task terpapar semasa penapis aktif */}
+            {isFilterActive && (
+              <span className="filter-bar__count">
+                {filteredTasks.length}/{tasks.length} tasks shown
+              </span>
+            )}
+          </div>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
@@ -98,7 +243,7 @@ const Home: React.FC = () => {
         </IonHeader>
 
         <Board
-          tasks={tasks}
+          tasks={filteredTasks}
           setTasks={setTasks}
           onAddTask={handleOpenCreate}
           onOpenTask={handleOpenEdit}

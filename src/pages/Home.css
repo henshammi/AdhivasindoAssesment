@@ -1,0 +1,56 @@
+/* ============================================================
+ *  Home — gaya bar carian & penapis (Tahap 6)
+ * ------------------------------------------------------------
+ *  Bar penapis menggunakan flex-wrap supaya susunannya kekal rapi
+ *  di desktop (semua dalam satu baris) mahupun mudah alih (select
+ *  melipat ke baris baharu secara automatik).
+ * ============================================================ */
+
+/* Toolbar carian judul */
+.home-toolbar--search {
+  padding: 0 8px 2px;
+}
+
+/* Bar penapis: Label / Assignee / Tarikh Akhir + butang Semula */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  width: 100%;
+  padding: 4px 12px 10px;
+}
+
+/* Setiap select mengisi ruang secara seimbang dan melipat bila perlu */
+.filter-bar__select {
+  flex: 1 1 150px;
+  max-width: 240px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--ion-color-light-shade, #d7d8da);
+  border-radius: 10px;
+  background: var(--ion-background-color, #ffffff);
+  font-size: 0.88rem;
+}
+
+/* Butang Set Semula penapis */
+.filter-bar__reset {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+/* Kiraan hasil penapis, cth: "3/7 task dipapar" */
+.filter-bar__count {
+  margin-left: auto;
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* Skrin sangat sempit — pastikan butang Semula tidak terpotong */
+@media (max-width: 400px) {
+  .filter-bar__reset {
+    flex: 1 0 auto;
+  }
+}
+

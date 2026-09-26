@@ -29,3 +29,15 @@ yarn-error.log*
 
 # Optional eslint cache
 .eslintcache
+
+# Ionic & Vite Build
+/www
+.vite/
+*.tsbuildinfo
+
+# OS Files
+Thumbs.db
+
+# AI Agents / Cline Local State
+/.cline/
+.cline_history/

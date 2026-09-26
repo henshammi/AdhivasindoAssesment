@@ -22,6 +22,7 @@ import {
   closeOutline,
   cloudUploadOutline,
   documentAttachOutline,
+  imageOutline,
   trashOutline,
 } from 'ionicons/icons';
 import { initialAssignees } from '../utils/dummyData';
@@ -45,6 +46,13 @@ const DUMMY_ATTACHMENT_NAMES = [
   'notes.txt',
   'report.docx',
 ];
+
+/**
+ * Random dummy cover image URL (picsum.photos) — one click gives the
+ * task a fresh cover image without any manual URL typing.
+ */
+const generateRandomCoverUrl = (): string =>
+  `https://picsum.photos/seed/${Math.random().toString(36).slice(2)}/400/200`;
 
 /** Shape of the modal form's internal state. */
 interface TaskFormState {
@@ -208,6 +216,19 @@ const TaskModal: React.FC<TaskModalProps> = ({
   };
 
   /**
+   * Cover image — one click sets a random dummy cover (picsum.photos),
+   * so the user never has to type an image URL manually.
+   */
+  const handleAddCoverImage = () => {
+    patchForm({ coverImage: generateRandomCoverUrl() });
+  };
+
+  /** Cover image — clear the cover back to the "Add Cover Image" state. */
+  const handleRemoveCoverImage = () => {
+    patchForm({ coverImage: '' });
+  };
+
+  /**
    * Submit the form — build the complete Task object.
    * `id: ''` in Create mode; Home will generate the real ID.
    */
@@ -252,6 +273,34 @@ const TaskModal: React.FC<TaskModalProps> = ({
       </IonHeader>
 
       <IonContent className="task-modal__content">
+        {/* ----- Cover image (bonus point) ----- */}
+        {!form.coverImage ? (
+          <button
+            type="button"
+            className="task-modal__cover-add"
+            onClick={handleAddCoverImage}
+          >
+            <IonIcon icon={imageOutline} aria-hidden="true" />
+            <span>Add Cover Image</span>
+          </button>
+        ) : (
+          <div className="task-modal__cover-preview">
+            <img
+              src={form.coverImage}
+              alt="Cover preview"
+              className="task-modal__cover-preview-img"
+            />
+            <IonButton
+              size="small"
+              className="task-modal__cover-remove"
+              onClick={handleRemoveCoverImage}
+            >
+              <IonIcon slot="start" icon={trashOutline} aria-hidden="true" />
+              Remove
+            </IonButton>
+          </div>
+        )}
+
         <IonList inset className="task-modal__fields">
           {/* Task title */}
           <IonItem>
@@ -277,22 +326,6 @@ const TaskModal: React.FC<TaskModalProps> = ({
               onIonInput={(e) =>
                 patchForm({ description: e.detail.value ?? '' })
               }
-            />
-          </IonItem>
-
-          {/* Bonus point: card cover image URL (optional) */}
-          <IonItem>
-            <IonInput
-              className="task-modal__cover-input"
-              label="Cover Image (URL)"
-              labelPlacement="stacked"
-              type="url"
-              placeholder="https://example.com/image.jpg"
-              value={form.coverImage}
-              onIonInput={(e) =>
-                patchForm({ coverImage: e.detail.value ?? '' })
-              }
-              helperText="Optional — shown at the top of the task card"
             />
           </IonItem>
 

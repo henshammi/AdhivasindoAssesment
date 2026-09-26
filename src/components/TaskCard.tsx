@@ -177,12 +177,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      {/* Bonus point: card cover image (when set) */}
+      {/* Bonus point: card cover image (when set) — rendered at the
+          very top of the card, before the header */}
       {task.coverImage && (
         <img
           src={task.coverImage}
           alt={`Cover: ${task.title}`}
           className="task-card__cover"
+          draggable={false}
+          loading="lazy"
         />
       )}
 

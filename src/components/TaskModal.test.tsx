@@ -120,7 +120,7 @@ describe('TaskModal', () => {
     expect(savedTask.subtasks[0]?.completed).toBe(false);
   });
 
-  test('bonus point: cover image URL is filled in & submitted with the task on Save', async () => {
+  test('bonus point: Add Cover Image generates a random cover & Remove clears it', async () => {
     const onSave = vi.fn();
     await renderOpenModal(null, 'todo', {
       onClose: vi.fn(),
@@ -135,23 +135,40 @@ describe('TaskModal', () => {
       new CustomEvent('ionInput', { detail: { value: 'Task with image' } })
     );
 
-    // Fill the cover image URL in the dedicated input (the value is trimmed on save).
-    const coverInput = document.querySelector(
-      'ion-input.task-modal__cover-input'
+    // No cover yet — only the "Add Cover Image" area is rendered.
+    expect(
+      document.querySelector('.task-modal__cover-preview-img')
+    ).toBeNull();
+
+    // One click generates a random dummy cover URL (no manual typing).
+    fireEvent.click(screen.getByText('Add Cover Image'));
+
+    // A small preview of the generated cover appears in the modal.
+    const preview = document.querySelector<HTMLImageElement>(
+      '.task-modal__cover-preview-img'
     );
-    expect(coverInput).not.toBeNull();
-    await fireEvent(
-      coverInput as Element,
-      new CustomEvent('ionInput', {
-        detail: { value: '  https://example.com/image.jpg  ' },
-      })
+    expect(preview).not.toBeNull();
+    expect(preview?.getAttribute('src')).toMatch(
+      /^https:\/\/picsum\.photos\/seed\/.+\/400\/200$/
     );
 
+    // Save — the generated cover is submitted with the task.
     fireEvent.click(screen.getByText('Save'));
-
     const savedTask = (onSave.mock.calls[0] as unknown as Task[])[0];
     expect(savedTask.title).toBe('Task with image');
-    expect(savedTask.coverImage).toBe('https://example.com/image.jpg');
+    expect(savedTask.coverImage).toMatch(
+      /^https:\/\/picsum\.photos\/seed\/.+\/400\/200$/
+    );
+
+    // Remove — the cover state is cleared and saving omits the cover.
+    fireEvent.click(screen.getByText('Remove'));
+    expect(
+      document.querySelector('.task-modal__cover-preview-img')
+    ).toBeNull();
+
+    fireEvent.click(screen.getByText('Save'));
+    const secondSavedTask = (onSave.mock.calls[1] as unknown as Task[])[0];
+    expect(secondSavedTask.coverImage).toBeUndefined();
   });
 
   test('dummy attachments: Add Dummy File button adds file names & saves them with the task', async () => {

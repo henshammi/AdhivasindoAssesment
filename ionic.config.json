@@ -1,0 +1,7 @@
+{
+  "name": "adhivasindo-task-management-board",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
